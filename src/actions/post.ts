@@ -48,10 +48,8 @@ export async function getPost(id: string) {
     try {
         const { data, error } = await supabaseClient.from('posts').select('*').eq('id', id).single()
         if (error) throw error
-        toast.success('Post retrieved successfully')
         return data
     } catch (error) {
-        toast.error('Failed to retrieve post')
         throw error
     }
 }
@@ -61,15 +59,12 @@ export async function getPostBySlug(slug: string): Promise<PostType | null> {
         const { data, error } = await supabaseClient.from('posts').select('*').match({ slug }).single();
         if (error) {
             if (error.code === 'PGRST116') {
-                toast.error('Post not found');
                 return null;
             }
             throw error as Error;
         }
-        toast.success('Post retrieved successfully');
         return data;
     } catch (error) {
-        toast.error('Failed to retrieve post');
         throw error;
     }
 }

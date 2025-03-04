@@ -1,4 +1,5 @@
-import { profanityFilter } from '@/shared/lib/moderation';
+'use server';
+
 import { supabaseClient } from '@/shared/lib/supabase/client';
 import type { Comment } from '@/shared/types';
 
@@ -33,27 +34,29 @@ export async function createComment({
     parentId,
 }: {
     postId: string;
-    profileId: string;
+    profileId: string | null;
     text: string;
     parentId?: string;
 }): Promise<{ success: boolean; comment?: Comment; error?: string }> {
-    // Server-side content moderation
-    const moderationResult = await profanityFilter.checkContent(text)
-    if (!moderationResult.isAppropriate) {
-        throw new Error("Content moderation failed")
+    if (profileId === null) {
+        return { success: false, error: "Disallowed attempt of posting a comment." };
     }
+
+    // Log user information and query parameters for debugging
+    console.log("Submitting comment with user id:", profileId);
 
     const { data, error } = await supabaseClient
         .from("comments")
         .insert([{ post_id: postId, profile_id: profileId, text, parent_id: parentId || null }])
         .select()
-        .single(); // Ensures we get the inserted row
+        .single();
 
     if (error) {
         console.error("Error creating comment:", error.message);
         return { success: false, error: error.message };
     }
 
+    console.log("Comment created successfully:", data);
     return { success: true, comment: data as Comment };
 }
 
@@ -98,8 +101,7 @@ export type CommentWithReplies = Comment & {
     replies?: CommentWithReplies[]
 }
 
-
-export function buildCommentsTree(comments: Comment[]): CommentWithReplies[] {
+export async function buildCommentsTree(comments: Comment[]): Promise<CommentWithReplies[]> {
     const map = new Map<string, CommentWithReplies>();
     const roots: CommentWithReplies[] = [];
 

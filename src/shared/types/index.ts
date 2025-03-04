@@ -1,4 +1,4 @@
-import { Database as DB, Tables, TablesInsert, TablesUpdate } from "../dbtypes";
+import { Database as DB, Tables, TablesInsert, TablesUpdate } from "./dbtypes";
 
 export type Database = DB;
 export type BlogPost = Tables<"posts">;
