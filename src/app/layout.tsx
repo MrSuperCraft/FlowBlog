@@ -4,6 +4,7 @@ import "./globals.css";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/shared/providers/ThemeProvider";
 import { Toaster } from "sonner";
+import { UserProvider } from "@/shared/context/UserContext";
 
 export const dynamic = "force-dynamic";
 
@@ -39,10 +40,12 @@ export default function RootLayout({
           disableTransitionOnChange
           themes={["light", "dark"]}
         >
-          <div className="flex min-h-screen flex-col">
-            <main className="flex-1">{children}</main>
-          </div>
-          <Toaster />
+          <UserProvider>
+            <div className="flex min-h-screen flex-col">
+              <main className="flex-1">{children}</main>
+            </div>
+            <Toaster />
+          </UserProvider>
         </ThemeProvider>
       </body>
     </html>
