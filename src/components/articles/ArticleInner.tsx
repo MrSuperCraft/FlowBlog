@@ -1,30 +1,51 @@
-import { Avatar } from "../ui/avatar"
-import { CalendarIcon, ClockIcon, MessageSquareIcon, ShareIcon } from "lucide-react"
-import { Separator } from "../ui/separator"
-import ReactionButton from "./ReactionButton"
-import { Button } from "../ui/button"
-import ArticleContent from "./ArticleContent"
-import { CommentSection } from "./CommentSection"
-import type { PostType, Profile } from "@/types"
-import ShareButton from "./ShareButton"
+'use client';
+
+import { Avatar } from "../ui/avatar";
+import { CalendarIcon, ClockIcon, MessageSquareIcon } from "lucide-react";
+import { Separator } from "../ui/separator";
+import ReactionButton from "./ReactionButton";
+import { Button } from "../ui/button";
+import ArticleContent from "./ArticleContent";
+import { CommentSection } from "./CommentSection";
+import type { PostType, Profile } from "@/shared/types";
+import ShareButton from "./ShareButton";
+import { useEffect, useState } from "react";
+import { useUser } from "@/shared/context/UserContext";
+import { supabaseClient } from "@/shared/lib/supabase/client";
 
 const ArticleInner = ({
     article,
-    authorProfile,
     username,
     articleDate,
     articleReadTime,
-    initiallyLiked,
-    currentUserId,
 }: {
-    article: PostType
-    authorProfile: Profile
-    username: string
-    articleDate: string
-    articleReadTime: string
-    initiallyLiked: boolean
-    currentUserId: string | null
+    article: PostType;
+    username: string;
+    articleDate: string;
+    articleReadTime: string;
 }) => {
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [profile, setProfile] = useState<Profile | null>(null);
+    const { session } = useUser();
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            setCurrentUserId(session?.user?.id ?? null);
+
+            // Fetch author profile
+            const { data: authorProfile } = await supabaseClient
+                .from("profiles")
+                .select("*")
+                .eq("id", article.author_id)
+                .single();
+
+            setProfile(authorProfile);
+        };
+
+        fetchUserData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // <-- empty dependency array ensures this runs only once
+
     return (
         <main className="container max-w-4xl mx-auto px-4 py-32">
             <div className="space-y-6">
@@ -34,14 +55,14 @@ const ArticleInner = ({
                     <div className="flex items-center justify-between flex-wrap gap-4">
                         <div className="flex items-center space-x-4">
                             <Avatar
-                                src={authorProfile.avatar_url!}
+                                src={profile?.avatar_url ?? ''}
                                 className="w-10 h-10 rounded-full object-cover mr-2"
-                                fallback={authorProfile.full_name!}
+                                fallback={profile?.full_name ?? ''}
                                 alt="Author Avatar"
                             />
                             <div>
                                 <a href={`/${username}`} className="font-medium text-lg hover:underline">
-                                    {authorProfile.full_name || username}
+                                    {profile?.full_name || username}
                                 </a>
                                 <div className="text-sm text-muted-foreground">@{username}</div>
                             </div>
@@ -60,16 +81,6 @@ const ArticleInner = ({
                     </div>
                 </div>
 
-                {/* {article.coverImage && (
-                <div className="relative aspect-video overflow-hidden rounded-lg">
-                  <img
-                    src={article.coverImage || "/placeholder.svg"}
-                    alt={article.title}
-                    className="object-cover"
-                  />
-                </div>
-              )}  */}
-
                 <Separator className="my-8" />
 
                 <div className="flex items-center justify-between">
@@ -77,7 +88,6 @@ const ArticleInner = ({
                         <ReactionButton
                             postId={article.id}
                             initialLikes={article.likes}
-                            initiallyLiked={initiallyLiked as boolean}
                         />
                         <Button
                             variant="ghost"
@@ -101,8 +111,7 @@ const ArticleInner = ({
                 <CommentSection postId={article.id} userId={currentUserId!} />
             </div>
         </main>
-    )
-}
+    );
+};
 
-export { ArticleInner }
-
+export { ArticleInner };

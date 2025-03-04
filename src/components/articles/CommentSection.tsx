@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { fetchCommentsForPost, buildCommentsTree, type CommentWithReplies } from "@/actions/comment"
+import { buildCommentsTree, fetchCommentsForPost, type CommentWithReplies } from "@/actions/comment"
 import { CommentForm } from "./CommentForm"
 import { CommentItem } from "./CommentItem"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -64,12 +64,13 @@ export function CommentSection({ postId, userId }: CommentSectionProps) {
     const [loading, setLoading] = useState(true)
     const isFirstLoad = useRef(true)
 
+
     const loadComments = useCallback(async () => {
         if (isFirstLoad.current) {
             setLoading(true)
         }
         const fetchedComments = await fetchCommentsForPost(postId)
-        setComments(buildCommentsTree(fetchedComments))
+        setComments(await buildCommentsTree(fetchedComments))
         setLoading(false)
         isFirstLoad.current = false
     }, [postId])
@@ -86,7 +87,7 @@ export function CommentSection({ postId, userId }: CommentSectionProps) {
         <div className="space-y-6">
             <h2 className="text-xl font-semibold">Comments</h2>
 
-            <CommentForm postId={postId} userId={userId} onSuccess={handleCommentSuccess} />
+            <CommentForm postId={postId} onSuccess={handleCommentSuccess} />
 
             <div className="pt-4">
                 {loading && isFirstLoad.current ? (

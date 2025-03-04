@@ -5,7 +5,6 @@ import { formatDistanceToNow } from "date-fns"
 import { Avatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import type { Comment } from "@/types"
 import { CommentForm } from "./CommentForm"
 import { MoreHorizontal, Reply, Trash2 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -23,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { LoginCTADropdown } from "./LoginCTADropdown"
 import { getProfileFromId } from "@/actions/user"
-import type { Profile } from "@/types"
+import type { Profile, Comment } from "@/shared/types"
 
 
 interface CommentItemProps {
@@ -188,7 +187,6 @@ export function CommentItem({
                         <div className="mt-3">
                             <CommentForm
                                 postId={postId}
-                                userId={currentUserId}
                                 parentId={level >= maxLevel ? comment.parent_id || comment.id : comment.id}
                                 onSuccess={handleReplySuccess}
                                 onCancel={() => setShowReplyForm(false)}
