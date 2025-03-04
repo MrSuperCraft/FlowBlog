@@ -15,6 +15,7 @@ import { useCreateBlockNote } from "@blocknote/react"
 import { sanitizeMarkdown } from "@/shared/lib/utils"
 import { useUser } from "@/shared/context/UserContext"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export function CreateNewPostPage() {
     const [title, setTitle] = useState("")
@@ -73,6 +74,11 @@ export function CreateNewPostPage() {
             } catch (error) {
                 console.error("Failed to parse blockNoteContent:", error)
             }
+        }
+
+        if (title.trim() === '') {
+            toast.error("Failed to create post: The title cannot be left empty. Please try again.")
+            return;
         }
 
         try {

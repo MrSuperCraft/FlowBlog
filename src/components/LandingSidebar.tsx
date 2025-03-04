@@ -82,7 +82,6 @@ export default function LandingSidebar() {
   const UserProfile = () => {
     const { user } = authStatus;
     if (!user || !profile) return null;
-    console.log(profile.avatar_url);
 
     if (!profile.avatar_url) return null;
 
