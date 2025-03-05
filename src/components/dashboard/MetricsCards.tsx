@@ -1,7 +1,7 @@
 import type React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThumbsUp, MessageSquare, Eye } from "lucide-react"
-import type { PostSummaryMetrics } from "@/types"
+import type { PostSummaryMetrics } from "@/shared/types"
 
 const formatNumber = (num: number) => new Intl.NumberFormat("en-US", { notation: "compact" }).format(num)
 
