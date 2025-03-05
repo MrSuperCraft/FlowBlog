@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { formatDistanceToNow } from "date-fns"
+import Link from "next/link"
 
 // Placeholder data for demonstration purposes
 const posts = [
@@ -42,7 +43,7 @@ const comments = [
 
 
 export function ProfileTabs() {
-    const [activeTab, setActiveTab] = useState("posts")
+    const [, setActiveTab] = useState("posts")
 
     return (
         <Tabs defaultValue="posts" className="space-y-4" onValueChange={setActiveTab}>
@@ -55,9 +56,9 @@ export function ProfileTabs() {
                     <Card key={post.id}>
                         <CardHeader>
                             <CardTitle className="text-xl">
-                                <a href="#" className="hover:text-primary">
+                                <Link href="#" className="hover:text-primary">
                                     {post.title}
-                                </a>
+                                </Link>
                             </CardTitle>
                             <p className="text-sm text-muted-foreground">{formatDistanceToNow(post.date, { addSuffix: true })}</p>
                         </CardHeader>
@@ -76,9 +77,9 @@ export function ProfileTabs() {
                         <CardHeader>
                             <CardTitle className="text-base font-normal">
                                 <span className="text-muted-foreground">Commented on </span>
-                                <a href="#" className="font-medium hover:text-primary">
+                                <Link href="#" className="font-medium hover:text-primary">
                                     {comment.postTitle}
-                                </a>
+                                </Link>
                             </CardTitle>
                             <p className="text-sm text-muted-foreground">{formatDistanceToNow(comment.date, { addSuffix: true })}</p>
                         </CardHeader>

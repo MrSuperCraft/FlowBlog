@@ -1,6 +1,8 @@
 "use client";
+
+
 import { useSidebar } from "@/shared/context/SidebarContext";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { LogOutIcon, SettingsIcon, User2Icon } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { AvatarWrapper, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -14,8 +16,7 @@ const AppHeader: React.FC = () => {
     const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
     const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
-    const { session } = useUser();
-    const user = session?.user
+    const { user } = useUser();
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {

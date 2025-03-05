@@ -21,6 +21,7 @@ import { Separator } from "./ui/separator";
 import { getProfileFromUsername } from "@/actions/user";
 import type { Profile } from "@/shared/types";
 import { Avatar } from "./ui/avatar";
+import Link from "next/link";
 
 const sidebarItems = [
   { icon: Home, label: "Home" },
@@ -111,7 +112,7 @@ export default function LandingSidebar() {
   const Footer = () => (
     <div className="flex justify-around p-4">
       {socialLinks.map((link) => (
-        <a
+        <Link
           key={link.label}
           href={link.url}
           target="_blank"
@@ -120,7 +121,7 @@ export default function LandingSidebar() {
           <link.icon
             className={cn("h-5 w-5 text-gray-500 hover:text-gray-700")}
           />
-        </a>
+        </Link>
       ))}
     </div>
   );

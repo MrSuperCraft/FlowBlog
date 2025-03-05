@@ -8,6 +8,7 @@
 import { Button } from "@/components/ui/button"
 import { AvatarWrapper, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MapPin, Calendar, LinkIcon, Github } from "lucide-react"
+import Link from "next/link"
 
 interface ProfileHeaderProps {
     user: {
@@ -69,22 +70,22 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
                                     <span>Joined {user.joinedDate}</span>
                                 </div>
                                 {user.website && (
-                                    <a
+                                    <Link
                                         href={user.website}
                                         className="flex items-center gap-1 hover:text-primary"
                                     >
                                         <LinkIcon className="w-4 h-4" />
                                         <span>{user.website}</span>
-                                    </a>
+                                    </Link>
                                 )}
                                 {user.github && (
-                                    <a
+                                    <Link
                                         href={user.github}
                                         className="flex items-center gap-1 hover:text-primary"
                                     >
                                         <Github className="w-4 h-4" />
                                         <span>GitHub</span>
-                                    </a>
+                                    </Link>
                                 )}
                             </div>
                         </div>

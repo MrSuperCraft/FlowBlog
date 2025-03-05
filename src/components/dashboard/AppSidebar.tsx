@@ -8,6 +8,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { ChevronDown, Home, User, List, Settings, PieChart, Box } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 import { usePathname } from "next/navigation"
+import Link from "next/link"
 
 type NavItem = {
     name: string
@@ -71,7 +72,7 @@ const AppSidebar: React.FC = () => {
                                 <ul className="mt-1 ml-4 space-y-1">
                                     {item.subItems.map((subItem) => (
                                         <li key={subItem.name}>
-                                            <a
+                                            <Link
                                                 href={subItem.path}
                                                 className={cn(
                                                     "block p-2 rounded-md transition-colors",
@@ -79,7 +80,7 @@ const AppSidebar: React.FC = () => {
                                                 )}
                                             >
                                                 {subItem.name}
-                                            </a>
+                                            </Link>
                                         </li>
                                     ))}
                                 </ul>
@@ -89,8 +90,8 @@ const AppSidebar: React.FC = () => {
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <a
-                                        href={item.path}
+                                    <Link
+                                        href={item.path!}
                                         className={cn(
                                             "flex items-center p-2 rounded-md transition-colors",
                                             pathname === item.path ? "bg-primary/5 text-blue-500" : "hover:bg-muted",
@@ -99,7 +100,7 @@ const AppSidebar: React.FC = () => {
                                     >
                                         {item.icon}
                                         {isExpanded && <span className="ml-3">{item.name}</span>}
-                                    </a>
+                                    </Link>
                                 </TooltipTrigger>
                                 <TooltipContent side="right">{item.name}</TooltipContent>
                             </Tooltip>
