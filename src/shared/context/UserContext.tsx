@@ -1,11 +1,11 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode, useCallback } from "react"
-import type { Session } from "@supabase/supabase-js"
+import type { User } from "@supabase/supabase-js"
 import { createClient } from "../lib/supabase/client"
 
 interface UserContextType {
-  session: Session | null
+  user: User | null
   loading: boolean
   refreshUser: () => Promise<void>
   isAuthenticated: boolean
@@ -14,7 +14,7 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   const getUser = useCallback(async () => {
@@ -22,18 +22,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true)
     try {
       const supabase = createClient()
-      const { data, error } = await supabase.auth.getSession()
+      const { data: { user }, error } = await supabase.auth.getUser()
 
-      if (error || !data.session) {
+      if (error || !user) {
         console.log("[UserProvider] No session found")
-        setSession(null)
+        setUser(null)
       } else {
-        console.log("[UserProvider] Session found:", data.session)
-        setSession(data.session)
+        console.log("[UserProvider] Session found:", user)
+        setUser(user)
       }
     } catch (err) {
       console.error("[UserProvider] Error fetching session:", err)
-      setSession(null)
+      setUser(null)
     } finally {
       setLoading(false)
     }
@@ -48,7 +48,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
+      setUser(session?.user ?? null)
     })
 
     return () => {
@@ -59,10 +59,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   return (
     <UserContext.Provider
       value={{
-        session,
+        user,
         loading,
         refreshUser: getUser,
-        isAuthenticated: !!session,
+        isAuthenticated: !!user,
       }}
     >
       {children}
@@ -72,9 +72,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
 export const useUser = (): UserContextType => {
   const context = useContext(UserContext)
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useUser must be used within a UserProvider")
   }
   return context
 }
-
