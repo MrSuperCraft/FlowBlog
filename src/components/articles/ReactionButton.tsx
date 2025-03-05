@@ -26,8 +26,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const { session } = useUser();
-  const user = session?.user;
+  const { user } = useUser();
 
   useEffect(() => {
     if (user) {
@@ -39,7 +38,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
             .select("*")
             .eq("post_id", postId)
             .eq("profile_id", user.id)
-            .single();
+            .maybeSingle();
           if (error) throw error;
 
           setLiked(!!data);

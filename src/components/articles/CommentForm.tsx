@@ -31,8 +31,8 @@ export function CommentForm({
     const [content, setContent] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [lastCommentTime, setLastCommentTime] = useState<number | null>(null)
-    const { session } = useUser();
-    const userId = session?.user.id
+    const { user } = useUser();
+    const userId = user?.id
 
     const submitComment = async () => {
         try {

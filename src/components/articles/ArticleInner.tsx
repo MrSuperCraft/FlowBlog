@@ -26,11 +26,11 @@ const ArticleInner = ({
 }) => {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
-    const { session } = useUser();
+    const { user } = useUser();
 
     useEffect(() => {
         const fetchUserData = async () => {
-            setCurrentUserId(session?.user?.id ?? null);
+            setCurrentUserId(user?.id ?? null);
 
             // Fetch author profile
             const { data: authorProfile } = await supabaseClient
