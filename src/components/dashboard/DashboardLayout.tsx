@@ -6,7 +6,7 @@ import AppHeader from "./AppHeader"
 import AppSidebar from "./AppSidebar"
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
-    const { isExpanded, isMobileOpen, isHovered } = useSidebar()
+    const { isExpanded, isMobileOpen } = useSidebar()
 
     return (
         <div className="min-h-screen flex">
