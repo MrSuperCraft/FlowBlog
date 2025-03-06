@@ -148,6 +148,9 @@ export function CreateNewPostPage() {
                 router.push(`/${username}/${slug}`)
             } else {
                 toast.success("Draft saved successfully!")
+                const username = user?.user_metadata.name
+                router.push(`/${username}/${slug}`)
+
             }
         } catch (error) {
             console.error("Failed to create post:", error)

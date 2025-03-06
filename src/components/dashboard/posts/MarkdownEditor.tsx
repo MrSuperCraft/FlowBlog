@@ -12,7 +12,7 @@ import remarkGfm from "remark-gfm"
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { useTheme } from "next-themes"
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import MarkdownCallout from "./MarkdownCallout"
 
 
@@ -105,7 +105,7 @@ export default function MarkdownEditor({ value, onChange }: MarkdownEditorProps)
                                             PreTag="div"
                                             language={language}
                                             style={theme === "light" ? oneLight
-                                                : atomOneDark}
+                                                : oneDark}
                                         >
                                             {String(children).replace(/\n$/, "")}
                                         </SyntaxHighlighter>
