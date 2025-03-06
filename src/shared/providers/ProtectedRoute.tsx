@@ -24,7 +24,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     // If we're on a dashboard route and still loading or not authenticated,
     // we could show a loading state
     if (loading && pathname.startsWith("/dashboard")) {
-        return <div>Loading...</div>
+        return <></>;
     }
 
     // For dashboard routes, only render children if authenticated
