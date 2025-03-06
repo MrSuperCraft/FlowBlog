@@ -84,7 +84,6 @@ export async function getPosts(status?: "draft" | "published" | "archived") {
         }
         const { data, error } = await query
         if (error) throw error
-        toast.success('Posts retrieved successfully')
         return data
     } catch (error) {
         toast.error('Failed to retrieve posts')
