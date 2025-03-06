@@ -20,6 +20,8 @@ export type Reaction = Tables<"reactions">;
 export type ReactionInsert = TablesInsert<"reactions">;
 export type Comment = Tables<"comments">;
 export type CommentInsert = TablesInsert<"comments">;
+export type View = Tables<"views">;
+export type ViewTimeRangeOptions = '24h' | '7d' | '30d' | '90d'
 
 export interface Post {
     id: string
