@@ -16,7 +16,7 @@ const AppHeader: React.FC = () => {
     const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
     const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
-    const { user } = useUser();
+    const { user, profile } = useUser();
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -47,6 +47,7 @@ const AppHeader: React.FC = () => {
                     onClick={handleToggle}
                     aria-label="Toggle Sidebar"
                 >
+                    {/* Toggle icon changes based on isMobileOpen */}
                     {isMobileOpen ? (
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <path
@@ -71,23 +72,23 @@ const AppHeader: React.FC = () => {
                     <DropdownMenu>
                         <DropdownMenuTrigger className="flex items-center justify-center w-10 h-10 cursor-pointer text-neutral-700 rounded-lg hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800">
                             <AvatarWrapper>
-                                <AvatarImage height={40} width={40} src={user?.user_metadata.avatar_url} />
+                                <AvatarImage height={40} width={40} src={profile ? profile.avatar_url : user?.user_metadata.avatar_url} />
                                 <AvatarFallback>
-                                    {user?.user_metadata.name
+                                    {(profile?.full_name as string)
                                         .split(' ')
                                         .map((n: string) => n[0])
                                         .join('')
-                                        .substr(0, 2)}
+                                        .substring(0, 2)}
                                 </AvatarFallback>
                             </AvatarWrapper>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="max-w-lg bg-white dark:bg-neutral-800 shadow-lg rounded-lg">
                             <DropdownMenuItem className="flex flex-col items-start cursor-default">
-                                <span className="font-semibold text-neutral-900 dark:text-neutral-200">{user?.user_metadata.name}</span>
+                                <span className="font-semibold text-neutral-900 dark:text-neutral-200">{profile?.full_name}</span>
                                 <span className="text-sm text-neutral-500 dark:text-neutral-400">{user?.email}</span>
                             </DropdownMenuItem>
                             <Separator className="my-1 h-0.5 rounded-full w-full bg-neutral-200 dark:bg-neutral-700" />
-                            <DropdownMenuItem onClick={() => router.push("/dashboard/profile")} className="cursor-pointer flex items-center gap-2 p-2 hover:bg-neutral-100 dark:hover:bg-neutral-700">
+                            <DropdownMenuItem onClick={() => router.push(`/${profile?.full_name}`)} className="cursor-pointer flex items-center gap-2 p-2 hover:bg-neutral-100 dark:hover:bg-neutral-700">
                                 <User2Icon className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
                                 Profile
                             </DropdownMenuItem>

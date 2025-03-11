@@ -1,49 +1,59 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useSidebar } from "@/shared/context/SidebarContext"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
-import { ChevronDown, Home, User, List, Settings, PieChart, Box } from "lucide-react"
-import { cn } from "@/shared/lib/utils"
-import { usePathname } from "next/navigation"
-import Link from "next/link"
+import React from "react";
+import { useSidebar } from "@/shared/context/SidebarContext";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { ChevronDown, Home, User, List, Settings, PieChart, Box } from "lucide-react";
+import { cn } from "@/shared/lib/utils";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { useUser } from "@/shared/context/UserContext";
 
 type NavItem = {
-    name: string
-    icon: React.ReactNode
-    path?: string
-    subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[]
-}
-
-const navItems: NavItem[] = [
-    { icon: <Home className="h-5 w-5" />, name: "Home", path: "/dashboard" },
-    { icon: <User className="h-5 w-5" />, name: "Profile", path: "/profile" },
-    {
-        icon: <List className="h-5 w-5" />,
-        name: "Posts",
-        subItems: [
-            { name: "All Posts", path: "/dashboard" },
-            { name: "New Post", path: "/dashboard/new" },
-            { name: "Categories", path: "/dashboard/categories" },
-        ],
-    },
-    { icon: <Settings className="h-5 w-5" />, name: "Settings", path: "/settings" },
-]
+    name: string;
+    icon: React.ReactNode;
+    path?: string;
+    subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+};
 
 const othersItems: NavItem[] = [
-    { icon: <PieChart className="h-5 w-5" />, name: "Analytics", path: "/analytics" },
+    { icon: <PieChart className="h-5 w-5" />, name: "Analytics", path: "/dashboard/analytics" },
     { icon: <Box className="h-5 w-5" />, name: "Media", path: "/media" },
-]
+];
 
 const AppSidebar: React.FC = () => {
     const { isExpanded, isMobileOpen, openSubmenu, toggleMobileSidebar, toggleSubmenu } =
-        useSidebar()
+        useSidebar();
     const pathname = usePathname();
+    const { profile } = useUser()
+    const fullName = profile?.full_name as string;
+
+
+    const navItems: NavItem[] = [
+        { icon: <Home className="h-5 w-5" />, name: "Home", path: "/dashboard" },
+        { icon: <User className="h-5 w-5" />, name: "Profile", path: `${fullName}` },
+        {
+            icon: <List className="h-5 w-5" />,
+            name: "Posts",
+            subItems: [
+                { name: "All Posts", path: "/dashboard" },
+                { name: "New Post", path: "/dashboard/new" },
+            ],
+        },
+        { icon: <Settings className="h-5 w-5" />, name: "Settings", path: "/dashboard/settings" },
+    ];
 
 
 
+
+    // Render menu items
     const renderMenuItems = (items: NavItem[]) => (
         <ul className="flex flex-col gap-1">
             {items.map((item) => (
@@ -55,7 +65,7 @@ const AppSidebar: React.FC = () => {
                                 className={cn(
                                     "flex items-center w-full p-2 rounded-md transition-colors",
                                     pathname === item.path ? "text-blue-500" : "hover:bg-muted",
-                                    !isExpanded && "h-10 w-full justify-center px-auto p-0",
+                                    !isExpanded && "h-10 w-full justify-center p-0"
                                 )}
                             >
                                 {item.icon}
@@ -76,7 +86,7 @@ const AppSidebar: React.FC = () => {
                                                 href={subItem.path}
                                                 className={cn(
                                                     "block p-2 rounded-md transition-colors",
-                                                    pathname === subItem.path ? "text-blue-500" : "hover:bg-muted",
+                                                    pathname === subItem.path ? "text-blue-500" : "hover:bg-muted"
                                                 )}
                                             >
                                                 {subItem.name}
@@ -95,7 +105,7 @@ const AppSidebar: React.FC = () => {
                                         className={cn(
                                             "flex items-center p-2 rounded-md transition-colors",
                                             pathname === item.path ? "bg-primary/5 text-blue-500" : "hover:bg-muted",
-                                            !isExpanded && "h-10 w-full px-auto justify-center p-0",
+                                            !isExpanded && "h-10 w-full justify-center p-0"
                                         )}
                                     >
                                         {item.icon}
@@ -109,7 +119,7 @@ const AppSidebar: React.FC = () => {
                 </li>
             ))}
         </ul>
-    )
+    );
 
     const sidebarContent = (
         <>
@@ -126,31 +136,29 @@ const AppSidebar: React.FC = () => {
                 </nav>
             </ScrollArea>
         </>
-    )
-
-    if (typeof window !== "undefined" && window.innerWidth < 768) {
-        return (
-            <Sheet open={isMobileOpen} onOpenChange={toggleMobileSidebar}>
-                <SheetContent side="left" className="p-0 w-64">
-                    {sidebarContent}
-                </SheetContent>
-            </Sheet>
-        )
-    }
+    );
 
     return (
-        <aside
-            className={cn(
-                "fixed top-0 left-0 z-30 h-screen",
-                "transition-all duration-300 ease-in-out",
-                isExpanded ? "w-64" : "w-16 pt-4",
-                "bg-background border-r",
-            )}
-        >
-            {sidebarContent}
-        </aside>
-    )
-}
+        <>
+            {/* Mobile Sidebar: visible only on small screens */}
+            <div className="md:hidden">
+                <Sheet open={isMobileOpen} onOpenChange={toggleMobileSidebar}>
+                    <SheetContent side="left" className="p-0 w-64">
+                        {sidebarContent}
+                    </SheetContent>
+                </Sheet>
+            </div>
+            {/* Desktop Sidebar: visible only on medium and larger screens */}
+            <aside
+                className={cn(
+                    "hidden md:block md:fixed md:top-0 md:left-0 md:z-30 md:h-screen md:transition-all md:duration-300 md:ease-in-out md:bg-background md:border-r",
+                    isExpanded ? "md:w-64" : "md:w-16 md:pt-4"
+                )}
+            >
+                {sidebarContent}
+            </aside>
+        </>
+    );
+};
 
-export default AppSidebar
-
+export default AppSidebar;
