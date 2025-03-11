@@ -6,13 +6,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1", 10);
     const post_limit = parseInt(searchParams.get("post_limit") || "10", 10);
+    const tag = searchParams.get('tag')!
 
     const { data, error } = await supabaseClient.rpc("get_discovery_posts", {
       page,
       post_limit,
+      filter_tag: tag
     });
 
     if (error) {
+      console.log(error.message)
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
