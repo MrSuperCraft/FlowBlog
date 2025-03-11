@@ -12,7 +12,7 @@ interface ViewTrackerProps {
 
 export default function ViewTracker({
     postId,
-    threshold = 5, // Default 5 seconds minimum view time
+    threshold = 20, // Default 5 seconds minimum view time
     apiEndpoint = "/api/views/track",
 }: ViewTrackerProps) {
     const startTime = useRef(Date.now())
@@ -167,7 +167,7 @@ export default function ViewTracker({
                 sessionId: sessionId.current,
                 viewTime: Math.round(totalTime.current),
                 readPercentage: Math.round(maxReadPercentage.current),
-                referrer: document.referrer || "direct",
+                referrer: window.location.host || "direct",
                 timestamp: new Date().toISOString(),
             }
 

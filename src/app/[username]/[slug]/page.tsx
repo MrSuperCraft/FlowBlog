@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { notFound, useRouter } from "next/navigation"
 import { getPostBySlug } from "@/actions/post"
 import type { PostType } from "@/shared/types"
 import { Header } from "@/components/Header"
@@ -25,8 +25,7 @@ const ArticlePage = () => {
         const slug = window.location.pathname.split("/")[2]
 
         if (!slug || typeof username !== "string") {
-            router.push("/404")
-            return
+            notFound();
         }
 
         setUsername(username)
@@ -37,8 +36,7 @@ const ArticlePage = () => {
                 const fetchedArticle = await getPostBySlug(slug)
 
                 if (!fetchedArticle) {
-                    router.push("/404")
-                    return
+                    notFound();
                 }
 
                 // Check if article is published or if current user is the author
@@ -53,7 +51,7 @@ const ArticlePage = () => {
                 }
             } catch (error) {
                 console.error("Error fetching article:", error)
-                router.push("/404")
+                notFound();
             } finally {
                 setLoading(false)
             }
