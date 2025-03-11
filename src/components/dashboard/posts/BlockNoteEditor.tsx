@@ -1,15 +1,21 @@
 "use client"
 
-import { BlockNoteView } from '@blocknote/mantine';
-import "@blocknote/mantine/style.css";
-import { useCreateBlockNote } from '@blocknote/react';
-import { locales, type PartialBlock } from '@blocknote/core';
-import debounce from 'lodash.debounce'
 
-export default function BlockNoteEditor({ initialContent, onChange }: { initialContent: string, onChange: (value: string) => void }) {
-    // Define a default non-empty content block as fallback
+// @ts-expect-error buggy import
+import { BlockNoteView } from "@blocknote/mantine"
+import "@blocknote/mantine/style.css"
+import { useCreateBlockNote } from "@blocknote/react"
+import { locales, type PartialBlock } from "@blocknote/core"
+import debounce from "lodash.debounce"
+import { Card } from "@/components/ui/card"
+import { useTheme } from "next-themes"
 
-    const locale = locales["en"];
+export default function BlockNoteEditor({
+    initialContent,
+    onChange,
+}: { initialContent: string; onChange: (value: string) => void }) {
+    const { theme } = useTheme()
+    const locale = locales["en"]
 
     const editor = useCreateBlockNote({
         initialContent: initialContent
@@ -19,18 +25,24 @@ export default function BlockNoteEditor({ initialContent, onChange }: { initialC
             ...locale,
             placeholders: {
                 ...locale.placeholders,
-                default: "Press '/' to see available blocks & commands."
-            }
+                default: "Press '/' to see available blocks & commands.",
+            },
         },
     })
 
     const handleEditorChange = debounce(() => {
-        onChange(JSON.stringify(editor.document, null, 2));
-    }, 1000);
+        onChange(JSON.stringify(editor.document, null, 2))
+    }, 1000)
 
     return (
-        <>
-            <BlockNoteView theme="light" editor={editor} onChange={handleEditorChange} className='border-t py-12' />
-        </>
+        <Card className="overflow-hidden border-none">
+            <BlockNoteView
+                theme={theme === "dark" ? "dark" : "light"}
+                editor={editor}
+                onChange={handleEditorChange}
+                className="min-h-[50vh] py-12"
+            />
+        </Card>
     )
 }
+

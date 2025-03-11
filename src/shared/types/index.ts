@@ -1,8 +1,8 @@
-import { Database as DB, Tables, TablesInsert, TablesUpdate } from "../dbtypes";
+import { Database as DB, Tables, TablesInsert, TablesUpdate } from "./dbtypes";
 
 export type Database = DB;
 export type BlogPost = Tables<"posts">;
-export type BlogPostFromFeed = Pick<BlogPost, "id" | "title" | "slug" | "excerpt" | "published_at" | "views" | "likes" | "tags"> & {
+export type BlogPostFromFeed = Pick<BlogPost, "id" | "title" | "slug" | "excerpt" | "published_at" | "views" | "likes" | "tags" | "cover_image"> & {
     author_full_name: string;
     author_avatar_url: string;
     comments: number;
@@ -20,6 +20,8 @@ export type Reaction = Tables<"reactions">;
 export type ReactionInsert = TablesInsert<"reactions">;
 export type Comment = Tables<"comments">;
 export type CommentInsert = TablesInsert<"comments">;
+export type View = Tables<"views">;
+export type ViewTimeRangeOptions = '24h' | '7d' | '30d' | '90d'
 
 export interface Post {
     id: string

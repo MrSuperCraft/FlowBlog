@@ -85,7 +85,7 @@ export function Header({ children }: { children?: React.ReactNode }) {
             <>
               <Link href="/sign-in">
                 <Button size="sm">
-                  <User className="mr-2 h-4 w-4" />
+                  <User className="sm:mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">Sign in</span>
                 </Button>
               </Link>

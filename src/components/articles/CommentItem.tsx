@@ -5,7 +5,6 @@ import { formatDistanceToNow } from "date-fns"
 import { Avatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import type { Comment } from "@/types"
 import { CommentForm } from "./CommentForm"
 import { MoreHorizontal, Reply, Trash2 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -23,8 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { LoginCTADropdown } from "./LoginCTADropdown"
 import { getProfileFromId } from "@/actions/user"
-import type { Profile } from "@/types"
-
+import type { Profile, Comment } from "@/shared/types"
 
 interface CommentItemProps {
     comment: CommentWithReplies
@@ -47,8 +45,10 @@ export function CommentItem({
     const [showDeleteAlert, setShowDeleteAlert] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
+    const [isUpdating, setIsUpdating] = useState(false)
     const [editedContent, setEditedContent] = useState(comment.text)
     const [profile, setProfile] = useState<Profile | null>(null)
+
 
     const isAuthor = currentUserId === comment.profile_id
     const formattedDate = comment.created_at ? formatDistanceToNow(new Date(comment.created_at), { addSuffix: true }) : ""
@@ -59,23 +59,37 @@ export function CommentItem({
 
     const handleDelete = async () => {
         setIsDeleting(true)
+        console.log("[handleDelete] Attempting to delete comment with ID:", comment.id)
+
+
+
         try {
             const success = await deleteComment(comment.id)
+
             if (success) {
                 toast.success("Comment deleted successfully")
                 onCommentUpdate()
             } else {
-                throw new Error("Failed to delete comment")
+                console.warn("[handleDelete] Deletion failed, no success returned")
+                toast.error("Failed to delete comment")
             }
         } catch (error) {
-            toast.error((error as Error).message)
+            console.error("[handleDelete] Delete error:", error)
+            toast.error(error instanceof Error ? error.message : "Failed to delete comment")
         } finally {
             setIsDeleting(false)
             setShowDeleteAlert(false)
         }
     }
 
+
     const handleUpdate = async () => {
+        if (!editedContent.trim()) {
+            toast.error("Comment cannot be empty")
+            return
+        }
+
+        setIsUpdating(true)
         try {
             const updatedComment = await updateComment(comment.id, editedContent)
             if (updatedComment) {
@@ -86,7 +100,10 @@ export function CommentItem({
                 throw new Error("Failed to update comment")
             }
         } catch (error) {
-            toast.error((error as Error).message)
+            console.error("Update error:", error)
+            toast.error(error instanceof Error ? error.message : "Failed to update comment")
+        } finally {
+            setIsUpdating(false)
         }
     }
 
@@ -113,7 +130,7 @@ export function CommentItem({
                     className="h-8 w-8"
                     src={profile?.avatar_url || ""}
                     alt={profile?.username || "User"}
-                    fallback={profile?.username || profile?.full_name || "User Avatar"}
+                    fallback={profile?.username?.[0] || profile?.full_name?.[0] || "U"}
                 />
 
                 <div className="flex-1 space-y-1">
@@ -151,12 +168,15 @@ export function CommentItem({
                                 value={editedContent}
                                 onChange={(e) => setEditedContent(e.target.value)}
                                 className="min-h-[80px] w-full"
+                                disabled={isUpdating}
                             />
                             <div className="mt-2 flex justify-end space-x-2">
-                                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                                <Button variant="outline" onClick={() => setIsEditing(false)} disabled={isUpdating}>
                                     Cancel
                                 </Button>
-                                <Button onClick={handleUpdate}>Update</Button>
+                                <Button onClick={handleUpdate} disabled={isUpdating || !editedContent.trim()}>
+                                    {isUpdating ? "Updating..." : "Update"}
+                                </Button>
                             </div>
                         </div>
                     ) : (
@@ -188,7 +208,6 @@ export function CommentItem({
                         <div className="mt-3">
                             <CommentForm
                                 postId={postId}
-                                userId={currentUserId}
                                 parentId={level >= maxLevel ? comment.parent_id || comment.id : comment.id}
                                 onSuccess={handleReplySuccess}
                                 onCancel={() => setShowReplyForm(false)}

@@ -1,5 +1,5 @@
 
-import { Database } from "@/shared/dbtypes";
+import { Database } from "@/shared/types/dbtypes";
 import { createBrowserClient } from "@supabase/ssr";
 
 export const createClient = () =>

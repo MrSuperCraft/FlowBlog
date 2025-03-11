@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,26 +9,49 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HeartIcon, LogInIcon, UserPlusIcon } from "lucide-react";
-import { useStore } from "@nanostores/react";
 import { supabaseClient } from "@/shared/lib/supabase/client";
-import { userStore } from "@/shared/context/UserContext";
+import Link from "next/link";
+import { useUser } from "@/shared/context/UserContext";
 
 type ReactionButtonProps = {
   postId: string;
   initialLikes: number;
-  initiallyLiked: boolean;
 };
 
 const ReactionButton: React.FC<ReactionButtonProps> = ({
   postId,
   initialLikes,
-  initiallyLiked,
 }) => {
-  const user = useStore(userStore).session?.user;
   const [likes, setLikes] = useState(initialLikes);
-  const [liked, setLiked] = useState(initiallyLiked);
+  const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const { user } = useUser();
+
+  useEffect(() => {
+    if (user) {
+      // Check if the user has already reacted to the post
+      const checkUserReaction = async () => {
+        try {
+          const { data, error } = await supabaseClient
+            .from("reactions")
+            .select("*")
+            .eq("post_id", postId)
+            .eq("profile_id", user.id)
+            .maybeSingle();
+          if (error) throw error;
+
+          setLiked(!!data);
+          // Removed the line that increments likes, as initialLikes already contains the correct count.
+        } catch (error) {
+          console.error("Error fetching user reaction:", error);
+        }
+      };
+
+      checkUserReaction();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleReaction = async () => {
     if (!user) {
@@ -88,7 +111,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
             </p>
 
             <div className="flex flex-col gap-2">
-              <a href="/sign-in" className="w-full">
+              <Link href="/sign-in" className="w-full">
                 <Button
                   variant="default"
                   size="sm"
@@ -97,9 +120,9 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
                 >
                   Sign in
                 </Button>
-              </a>
+              </Link>
 
-              <a href="/sign-up" className="w-full">
+              <Link href="/sign-up" className="w-full">
                 <Button
                   variant="outline"
                   size="sm"
@@ -108,7 +131,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
                 >
                   Create account
                 </Button>
-              </a>
+              </Link>
             </div>
           </div>
         </DropdownMenuContent>
