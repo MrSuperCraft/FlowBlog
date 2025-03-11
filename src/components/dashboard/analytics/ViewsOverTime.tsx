@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { groupDataByInterval } from "@/actions/analytics";
@@ -18,18 +17,17 @@ const chartConfig = {
         // OR a theme object with 'light' and 'dark' keys
         theme: {
             light: "#2563eb",
-            dark: "#dc2626",
+            dark: "#509ce7",
         },
     }
 } satisfies ChartConfig
 
-const ViewsOverTime = () => {
-    const [timeRange, setTimeRange] = useState<ViewTimeRangeOptions>("7d");
+const ViewsOverTime = ({ timeRange = "7d" }: { timeRange: ViewTimeRangeOptions }) => {
     const [viewsData, setViewsData] = useState<{ time_period: string; views_count: number }[]>([]);
-    const articleId = window.location.pathname.split("/").pop()!;
 
     useEffect(() => {
         const fetchData = async () => {
+            const articleId = window.location.pathname.split("/").pop()!;
             try {
                 // Calculate milliseconds to subtract based on time range
                 let millisecondsToSubtract: number;
@@ -74,7 +72,7 @@ const ViewsOverTime = () => {
         };
 
         fetchData();
-    }, [articleId, timeRange]);
+    }, [timeRange]);
 
     // Use date-fns to format the date.
     const formatDate = (dateString: string) => {
@@ -100,20 +98,6 @@ const ViewsOverTime = () => {
                     <CardDescription>
                         Total views: {viewsData.reduce((sum, item) => sum + item.views_count, 0)}
                     </CardDescription>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <Button variant={timeRange === "24h" ? "default" : "outline"} size="sm" onClick={() => setTimeRange("24h")}>
-                        24h
-                    </Button>
-                    <Button variant={timeRange === "7d" ? "default" : "outline"} size="sm" onClick={() => setTimeRange("7d")}>
-                        7d
-                    </Button>
-                    <Button variant={timeRange === "30d" ? "default" : "outline"} size="sm" onClick={() => setTimeRange("30d")}>
-                        30d
-                    </Button>
-                    <Button variant={timeRange === "90d" ? "default" : "outline"} size="sm" onClick={() => setTimeRange("90d")}>
-                        90d
-                    </Button>
                 </div>
             </CardHeader>
             <CardContent className="pt-4">
