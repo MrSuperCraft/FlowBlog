@@ -19,11 +19,10 @@ const DashboardApp = () => {
   })
   const [isLoading, setIsLoading] = useState(true)
   const { user } = useUser()
-
   const fetchPosts = async () => {
     setIsLoading(true)
     try {
-      const fetchedPosts = await getPosts()
+      const fetchedPosts = await getPosts(user?.id as string)
       setPosts(
         fetchedPosts.map((post) => ({
           ...post,
@@ -40,6 +39,8 @@ const DashboardApp = () => {
       setIsLoading(false)
     }
   }
+
+
 
   useEffect(() => {
     async function getTotalMetrics() {
@@ -65,7 +66,8 @@ const DashboardApp = () => {
     }
     getTotalMetrics()
     fetchPosts()
-  }, [user?.id])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
 
   return (

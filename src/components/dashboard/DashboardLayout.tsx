@@ -9,7 +9,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     const { isExpanded, isMobileOpen } = useSidebar()
 
     return (
-        <div className="min-h-screen flex">
+        <div className="min-h-screen flex bg-background">
             {/* Sidebar */}
             <AppSidebar />
 
