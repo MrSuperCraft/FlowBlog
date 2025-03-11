@@ -2,7 +2,7 @@ import { Database as DB, Tables, TablesInsert, TablesUpdate } from "./dbtypes";
 
 export type Database = DB;
 export type BlogPost = Tables<"posts">;
-export type BlogPostFromFeed = Pick<BlogPost, "id" | "title" | "slug" | "excerpt" | "published_at" | "views" | "likes" | "tags"> & {
+export type BlogPostFromFeed = Pick<BlogPost, "id" | "title" | "slug" | "excerpt" | "published_at" | "views" | "likes" | "tags" | "cover_image"> & {
     author_full_name: string;
     author_avatar_url: string;
     comments: number;
