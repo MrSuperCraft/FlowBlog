@@ -21,18 +21,26 @@ interface BlogPost {
   author_full_name: string
   author_avatar_url: string
   tags: string[]
+  cover_image: string
   score?: number
 }
 
-const fetchPosts = async (page: number): Promise<BlogPost[]> => {
-  const res = await fetch(`/api/posts?page=${page}&post_limit=10`)
-  if (!res.ok) {
-    throw new Error("Failed to fetch posts")
-  }
-  return res.json()
-}
+const fetchPosts = async (page: number, tag?: string): Promise<BlogPost[]> => {
+  const url = tag
+    ? `/api/posts?page=${page}&post_limit=10&tag=${tag}`
+    : `/api/posts?page=${page}&post_limit=10`;
 
-export default function BlogFeed() {
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch posts");
+  }
+
+  return res.json();
+};
+
+
+export default function BlogFeed({ tag }: { tag?: string }) {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -43,7 +51,7 @@ export default function BlogFeed() {
     if (loading || !hasMore) return
     setLoading(true)
     try {
-      const newPosts = await fetchPosts(page)
+      const newPosts = await fetchPosts(page, tag)
       if (newPosts.length === 0) {
         setHasMore(false)
       } else {
@@ -56,7 +64,7 @@ export default function BlogFeed() {
       setLoading(false)
       setInitialLoad(false)
     }
-  }, [page, loading, hasMore])
+  }, [page, loading, hasMore, tag])
 
   useEffect(() => {
     loadMorePosts()
@@ -89,7 +97,7 @@ export default function BlogFeed() {
   }
 
   return (
-    <div className="space-y-8 max-w-3xl mx-auto px-4 pb-12">
+    <div className="space-y-8 px-2 md:px-8 lg:px-24 pb-12">
       {posts.map((post) => (
         <Link
           key={post.id}

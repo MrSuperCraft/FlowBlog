@@ -1,10 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar } from "@/components/ui/avatar";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/shared/context/UserContext";
 import { cn } from "@/shared/lib/utils";
+
 import {
   Home,
   Bookmark,
@@ -15,21 +20,21 @@ import {
   Facebook,
   Instagram,
 } from "lucide-react";
-import { isAuthenticated } from "@/shared/lib/supabase/helpers"; // Import the isAuthenticated function
-import type { User } from "@supabase/supabase-js";
-import { Separator } from "./ui/separator";
-import { getProfileFromUsername } from "@/actions/user";
-import type { Profile } from "@/shared/types";
-import { Avatar } from "./ui/avatar";
-import Link from "next/link";
 
-const sidebarItems = [
-  { icon: Home, label: "Home" },
-  { icon: Bookmark, label: "Bookmarks" },
-  { icon: TrendingUp, label: "Trending" },
-  { icon: PenSquare, label: "Write" },
+interface SidebarItem {
+  label: string;
+  href: string;
+  icon?: React.ReactNode;
+}
+
+// Core nav items for everyone
+const baseItems: SidebarItem[] = [
+  { label: "Home", href: "/", icon: <Home /> },
+  { label: "Bookmarks", href: "/bookmarks", icon: <Bookmark /> },
+  { label: "Trending", href: "/trending", icon: <TrendingUp /> },
 ];
 
+// Social links
 const socialLinks = [
   { icon: Twitter, label: "Twitter", url: "https://twitter.com" },
   { icon: Facebook, label: "Facebook", url: "https://facebook.com" },
@@ -37,128 +42,182 @@ const socialLinks = [
 ];
 
 export default function LandingSidebar() {
-  const [activeItem, setActiveItem] = useState("Home");
-  const [authStatus, setAuthStatus] = useState<{
-    authenticated: boolean;
-    user: User | null;
-  }>({ authenticated: false, user: null });
-  const [profile, setProfile] = useState<Profile | null>(null); // New state for profile
   const [open, setOpen] = useState(false);
+  const [activeItem] = useState("Home");
+  const router = useRouter();
 
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      const status = await isAuthenticated();
-      setAuthStatus(status);
-      if (status.authenticated && status.user) {
-        const userProfile = await getProfileFromUsername(status.user.id);
-        setProfile(userProfile);
-      }
-    };
-    checkAuthStatus();
-  }, []);
+  // Replace this with your actual user logic
+  const { profile, user, isAuthenticated } = useUser();
 
-  const SidebarContent = () => (
-    <div className="flex h-full max-h-2/3 flex-col">
-      <div className="flex-1">
-        <div className="space-y-4 py-4">
-          {sidebarItems.map((item) => (
-            <Button
-              key={item.label}
-              variant="ghost"
-              className={cn(
-                "w-full justify-start",
-                activeItem === item.label && "bg-accent"
-              )}
-              onClick={() => setActiveItem(item.label)}
-            >
-              <item.icon className="mr-2 h-4 w-4" />
-              {item.label}
-            </Button>
-          ))}
+  /**
+   * SidebarHeader:
+   * - If user is authenticated, show user avatar & name.
+   * - Otherwise, show a community CTA (like DEV.to).
+   */
+  const SidebarHeader = () => {
+    if (isAuthenticated && user && profile?.avatar_url) {
+      return (
+        <div className="p-4 border-b border-gray-200 dark:border-neutral-800">
+          <Link href={`/${profile.full_name}`}>
+            <div className="flex items-center space-x-3">
+              <Avatar
+                src={profile.avatar_url}
+                alt="User Avatar"
+                fallback={user.user_metadata.name}
+              />
+              <div className="flex flex-col">
+                <h3 className="text-sm md:text-base lg:text-lg font-medium text-primary">
+                  {profile.full_name}
+                </h3>
+              </div>
+            </div>
+          </Link>
         </div>
-      </div>
-    </div>
-  );
+      );
+    }
 
-  const UserProfile = () => {
-    const { user } = authStatus;
-    if (!user || !profile) return null;
-
-    if (!profile.avatar_url) return null;
-
+    // Non-auth header
     return (
-      <div className="flex items-center space-x-4 p-4 pt-12">
-        <Avatar
-          src={profile.avatar_url ?? ""}
-          alt="User Avatar"
-          fallback={user.user_metadata.name}
-        />
-        <div className="text-left">
-          <h3 className="text-sm md:text-base lg:text-lg font-medium">
-            {user.user_metadata.name}
-          </h3>
-          {/* {profile.bio && <p className="text-xs text-gray-500">{profile.bio}</p>}
-                    {profile.location && <p className="text-xs text-gray-500">{profile.location}</p>}
-                    {profile.website && (
-                        <a href={profile.website} className="text-xs text-blue-500 hover:underline">
-                            {profile.website}
-                        </a>
-                    )} */}
+      <div className="p-4 border-b border-gray-200 dark:border-neutral-800">
+        <h2 className="text-xl font-bold text-primary">Join the FlowBlog Community</h2>
+        <p className="text-sm text-gray-600 dark:text-neutral-400 mt-1">
+          Be among the first to experience FlowBlog — a new space where passionate bloggers will connect, share, and grow together.
+        </p>
+
+        <div className="mt-4 space-x-6">
+          <Button
+            variant="outline"
+            onClick={() => router.push("/sign-up")}
+            className="text-primary"
+          >
+            Create account
+          </Button>
+          <Link href="/sign-in" className="text-sm text-primary hover:underline">
+            Log in
+          </Link>
         </div>
       </div>
     );
   };
 
-  const Footer = () => (
-    <div className="flex justify-around p-4">
-      {socialLinks.map((link) => (
-        <Link
-          key={link.label}
-          href={link.url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <link.icon
-            className={cn("h-5 w-5 text-gray-500 hover:text-gray-700")}
-          />
-        </Link>
-      ))}
-    </div>
+  /**
+   * SidebarNav:
+   * - Shows core items to everyone.
+   * - Adds "Write" button for authenticated users.
+   */
+  const SidebarNav = () => {
+    return (
+      <nav className="py-4">
+        <div className="space-y-2">
+          {baseItems.map((item) => (
+            <Button
+              key={item.label}
+              variant="ghost"
+              onClick={() => router.push(item.href)}
+              className={cn(
+                "w-full justify-start text-sm py-2 text-primary",
+                activeItem === item.label && "bg-accent"
+              )}
+              iconBefore={item.icon}
+            >
+              {item.label}
+            </Button>
+          ))}
+          {isAuthenticated && (
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/dashboard/new")}
+              className="w-full justify-start text-sm py-2 text-primary"
+              iconBefore={<PenSquare />}
+            >
+              Write
+            </Button>
+          )}
+        </div>
+      </nav>
+    );
+  };
+
+  /**
+   * SidebarFooter:
+   * - Contains disclaimers, social links, or additional info (like DEV.to).
+   */
+  const SidebarFooter = () => (
+    <footer className="mt-auto p-6 lg:px-6 px-2  border-t border-gray-200 dark:border-neutral-800">
+      <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
+        <span className="font-semibold text-primary">FlowBlog</span> — your custom blogging platform, designed for simplicity and speed.
+      </p>
+      <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
+        Crafted with{' '}
+        <Link href="https://nextjs.org" className="underline text-primary">
+          Next.js
+        </Link>{' '}
+        to bring you the best blogging experience.
+      </p>
+      <div className="flex justify-center gap-6 mt-6">
+        {socialLinks.map((link) => (
+          <Link
+            key={link.label}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+          >
+            <link.icon className="h-5 w-5" />
+          </Link>
+        ))}
+      </div>
+      <p className="text-sm text-neutral-400 dark:text-neutral-500 text-center mt-6">
+        © {new Date().getFullYear()} FlowBlog. All rights reserved.
+      </p>
+    </footer>
+  );
+
+  /**
+   * Mobile (Sheet) layout
+   */
+  const MobileSidebar = () => (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="outline" size="icon" className="md:hidden">
+          <Menu className="h-4 w-4" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-[300px] p-0">
+        <SheetHeader>
+          <SheetTitle>
+            FlowBlog
+          </SheetTitle>
+          <SheetDescription>
+            Blogging Made Effortless
+          </SheetDescription>
+        </SheetHeader>
+        <ScrollArea className="h-full flex flex-col">
+          <SidebarNav />
+          <SidebarHeader />
+          <SidebarFooter />
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
+  );
+
+  /**
+   * Desktop layout
+   */
+  const DesktopSidebar = () => (
+    <aside className="hidden md:flex fixed flex-col max-w-[30%] lg:max-w-[20%] h-[calc(100vh-8rem)] border-gray-200 dark:border-neutral-800">
+      <SidebarHeader />
+      <ScrollArea className="flex-1">
+        <SidebarNav />
+      </ScrollArea>
+      <SidebarFooter />
+    </aside>
   );
 
   return (
     <>
-      {/* Mobile sidebar */}
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="md:hidden">
-            <Menu className="h-4 w-4" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-[300px] p-0">
-          <ScrollArea className="h-full">
-            {authStatus.authenticated && <UserProfile />}
-            <SidebarContent />
-            <Footer />
-          </ScrollArea>
-        </SheetContent>
-      </Sheet>
-
-      {/* Desktop sidebar */}
-      <aside className="hidden h-[calc(100vh-8rem)] flex-col md:flex fixed max-w-[25%] lg:max-w-[20%]">
-        {authStatus.authenticated && (
-          <>
-            <UserProfile />
-            <Separator className="w-full h-1 rounded-full mb-6" />
-          </>
-        )}
-
-        <ScrollArea className="flex-1">
-          <SidebarContent />
-        </ScrollArea>
-        <Separator className="w-full h-1 rounded-full mb-6" />
-        <Footer />
-      </aside>
+      <MobileSidebar />
+      <DesktopSidebar />
     </>
   );
 }
