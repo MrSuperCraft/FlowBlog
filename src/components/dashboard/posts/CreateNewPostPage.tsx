@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { X, Save, Send, Hash } from "lucide-react"
+import { X, Save, Send, Hash, Upload, ImageIcon } from "lucide-react"
 import MarkdownEditor from "./MarkdownEditor"
 import BlockNoteEditor from "./BlockNoteEditor"
 import { Textarea } from "@/components/ui/textarea"
@@ -30,10 +30,14 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Card, CardContent } from "@/components/ui/card"
+import Image from "next/image"
+import { uploadCoverImage } from "@/actions/image"
+import { v4 as uuidv4 } from 'uuid';
+
 
 export function CreateNewPostPage() {
     const [title, setTitle] = useState("")
-    const { user } = useUser()
+    const { user, profile } = useUser()
     const router = useRouter()
     const id = user?.id ?? ""
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -48,6 +52,10 @@ export function CreateNewPostPage() {
     const [markdownContent, setMarkdownContent] = useState("")
     const [blockNoteContent, setBlockNoteContent] = useState("")
     const MAX_TAGS = 5
+
+    const [coverImage, setCoverImage] = useState<File | null>(null)
+    const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
+    const [isUploadingImage, setIsUploadingImage] = useState(false)
 
     // Track unsaved changes
     useEffect(() => {
@@ -64,10 +72,10 @@ export function CreateNewPostPage() {
 
     // Update unsaved changes flag
     useEffect(() => {
-        if (title || tags.length > 0 || markdownContent || blockNoteContent) {
+        if (title || tags.length > 0 || markdownContent || blockNoteContent || coverImage) {
             setHasUnsavedChanges(true)
         }
-    }, [title, tags, markdownContent, blockNoteContent])
+    }, [title, tags, markdownContent, blockNoteContent, coverImage])
 
     const handleAddTag = () => {
         const trimmedTag = currentTag.trim().toLowerCase()
@@ -99,6 +107,41 @@ export function CreateNewPostPage() {
         return `${slug}-${identifier}`
     }
 
+    const handleCoverImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        // Check file size (limit to 1MB)
+        if (file.size > 1024 * 1024) {
+            toast.error("Image size must be less than 1MB")
+            return
+        }
+
+        // Check file type
+        if (!file.type.startsWith("image/")) {
+            toast.error("File must be an image")
+            return
+        }
+
+        setCoverImage(file)
+
+        // Create a preview URL
+        const objectUrl = URL.createObjectURL(file)
+        setCoverImageUrl(objectUrl)
+
+        // Update unsaved changes flag
+        setHasUnsavedChanges(true)
+    }
+
+    const handleRemoveCoverImage = () => {
+        setCoverImage(null)
+        if (coverImageUrl) {
+            URL.revokeObjectURL(coverImageUrl)
+            setCoverImageUrl(null)
+        }
+        setHasUnsavedChanges(true)
+    }
+
     // Unified save handler for both published posts and drafts.
     const handleSave = async (status: "published" | "draft") => {
         if (title.trim() === "") {
@@ -128,8 +171,26 @@ export function CreateNewPostPage() {
             return
         }
 
+        // Generate a temporary ID for the post to use in the image path
+        const newId = uuidv4();
         try {
+            // Upload cover image if exists
+            let coverImagePath = null
+            if (coverImage) {
+                setIsUploadingImage(true)
+                try {
+                    coverImagePath = await uploadCoverImage(coverImage, newId)
+                } catch (error) {
+                    console.error("Failed to upload cover image:", error)
+                    toast.error("Failed to upload cover image. Post will be saved without a cover image.")
+                    return;
+                } finally {
+                    setIsUploadingImage(false)
+                }
+            }
+
             await createPost({
+                id: newId,
                 author_id: id,
                 title,
                 slug,
@@ -138,19 +199,19 @@ export function CreateNewPostPage() {
                 content,
                 status,
                 published_at: status === "published" ? new Date().toISOString() : null,
+                cover_image: coverImagePath, // Add the cover image URL
             })
 
             setHasUnsavedChanges(false)
 
             if (status === "published") {
                 toast.success("Post published successfully!")
-                const username = user?.user_metadata.name
+                const username = profile?.full_name
                 router.push(`/${username}/${slug}`)
             } else {
                 toast.success("Draft saved successfully!")
-                const username = user?.user_metadata.name
+                const username = profile?.full_name
                 router.push(`/${username}/${slug}`)
-
             }
         } catch (error) {
             console.error("Failed to create post:", error)
@@ -181,6 +242,57 @@ export function CreateNewPostPage() {
                 </div>
             </div>
 
+            <Card className="mb-8">
+                <CardContent className="p-4">
+                    <div className="flex items-center mb-4">
+                        <ImageIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="font-medium">Cover Image</span>
+                    </div>
+
+                    {coverImageUrl ? (
+                        <div className="relative">
+                            <div className="aspect-video w-full relative rounded-md overflow-hidden border">
+                                <Image
+                                    src={coverImageUrl || "/placeholder.svg"}
+                                    alt="Cover image preview"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2 rounded-full p-2 h-8 w-8"
+                                onClick={handleRemoveCoverImage}
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="border border-dashed rounded-md p-8 text-center">
+                            <div className="flex flex-col items-center gap-2">
+                                <Upload className="h-8 w-8 text-muted-foreground" />
+                                <p className="text-sm font-medium">Drag and drop or click to upload</p>
+                                <p className="text-xs text-muted-foreground">Recommended size: 1200 × 675 pixels (16:9 ratio)</p>
+                                <p className="text-xs text-muted-foreground">Maximum size: 1MB</p>
+                                <label htmlFor="cover-image-upload">
+                                    <Button variant="secondary" size="sm" className="mt-2">
+                                        Select Image
+                                    </Button>
+                                </label>
+                                <Input
+                                    id="cover-image-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleCoverImageChange}
+                                    className="sr-only"
+                                />
+                            </div>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
             {/* Tags Input */}
             <Card className="mb-8">
                 <CardContent className="p-4">
@@ -201,20 +313,13 @@ export function CreateNewPostPage() {
                             className="flex-grow w-full max-w-3xs"
                             maxLength={20}
                         />
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={handleAddTag}
-                            disabled={tags.length >= MAX_TAGS}
-                        >
+                        <Button variant="secondary" size="sm" onClick={handleAddTag} disabled={tags.length >= MAX_TAGS}>
                             Add
                         </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-3">
                         {tags.map((tag) => (
-                            <div
-                                key={tag}
-                            >
+                            <div key={tag}>
                                 <Badge
                                     variant="secondary"
                                     className="text-sm flex items-center cursor-pointer group px-3 py-1"
@@ -254,9 +359,18 @@ export function CreateNewPostPage() {
             <div className="flex space-x-4">
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
-                        <Button className="flex-1 flex items-center gap-2" disabled={isSubmitting}>
-                            <Send className="h-4 w-4" />
-                            Publish Post
+                        <Button className="flex-1 flex items-center gap-2" disabled={isSubmitting || isUploadingImage}>
+                            {isSubmitting || isUploadingImage ? (
+                                <>
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                                    {isUploadingImage ? "Uploading..." : "Publishing..."}
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="h-4 w-4" />
+                                    Publish Post
+                                </>
+                            )}
                         </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -277,10 +391,19 @@ export function CreateNewPostPage() {
                     variant="secondary"
                     onClick={handleDraft}
                     className="flex-1 flex items-center gap-2"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isUploadingImage}
                 >
-                    <Save className="h-4 w-4" />
-                    Save Draft
+                    {isSubmitting || isUploadingImage ? (
+                        <>
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                            {isUploadingImage ? "Uploading..." : "Saving..."}
+                        </>
+                    ) : (
+                        <>
+                            <Save className="h-4 w-4" />
+                            Save Draft
+                        </>
+                    )}
                 </Button>
             </div>
         </div>
