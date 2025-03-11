@@ -28,6 +28,7 @@ import {
     Trash2,
     Eye,
     AlertCircle,
+    PencilLine,
 } from "lucide-react"
 import {
     flexRender,
@@ -120,7 +121,7 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
     const [quickEditTitle, setQuickEditTitle] = useState("")
     const [quickEditStatus, setQuickEditStatus] = useState<string>("")
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const { user } = useUser();
+    const { profile } = useUser();
 
     // Function to update local data
     const updateLocalData = useCallback((updatedPost: Post) => {
@@ -285,7 +286,7 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Link href={`/${user?.user_metadata.full_name}/${post.slug}`} target="_blank">
+                                        <Link href={`/${profile?.full_name}/${post.slug}`} target="_blank">
                                             <Button variant="ghost" size="icon" className="h-8 w-8">
                                                 <Eye className="h-4 w-4" />
                                                 <span className="sr-only">View</span>
@@ -307,24 +308,25 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-[180px]">
                                 <DropdownMenuItem asChild>
-                                    <Link href={`/dashboard/edit/${post.id}`} className="cursor-pointer">
-                                        <Pencil className="mr-2 h-4 w-4" />
+                                    <Link href={`/dashboard/edit/${post.id}`} className="flex items-center px-3 py-2 cursor-pointer hover:bg-muted rounded-md transition-colors">
+                                        <PencilLine className="mr-2 h-4 w-4 transition-transform group-hover:scale-105" />
                                         <span>Edit</span>
                                     </Link>
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem
                                     onClick={() => {
-                                        setQuickEditPost(post)
+                                        setQuickEditPost(post);
                                     }}
+                                    className="flex items-center px-3 py-2 cursor-pointer hover:bg-muted rounded-md transition-colors"
                                 >
-                                    <Pencil className="mr-2 h-4 w-4" />
+                                    <Pencil className="mr-2 h-4 w-4 transition-transform group-hover:scale-105" />
                                     <span>Quick Edit</span>
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem asChild>
-                                    <Link href={`/${user?.user_metadata.full_name}/${post.slug}`} target="_blank" className="cursor-pointer">
-                                        <Eye className="mr-2 h-4 w-4" />
+                                    <Link href={`/${profile?.full_name}/${post.slug}`} target="_blank" className="flex items-center px-3 py-2 cursor-pointer hover:bg-muted rounded-md transition-colors">
+                                        <Eye className="mr-2 h-4 w-4 transition-transform group-hover:scale-105" />
                                         <span>View</span>
                                     </Link>
                                 </DropdownMenuItem>
@@ -333,12 +335,12 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
 
                                 <DropdownMenuItem
                                     onClick={() => {
-                                        setPostToDelete(post.id)
-                                        setDeleteDialogOpen(true)
+                                        setPostToDelete(post.id);
+                                        setDeleteDialogOpen(true);
                                     }}
-                                    className="text-destructive focus:text-destructive"
+                                    className="flex items-center px-3 py-2 cursor-pointer text-destructive hover:bg-destructive/10 rounded-md"
                                 >
-                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    <Trash2 className="mr-2 h-4 w-4 transition-transform text-destructive group-hover:scale-105" />
                                     <span>Delete</span>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -632,12 +634,13 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
                             <label htmlFor="title" className="text-right text-sm font-medium">
                                 Title
                             </label>
-                            <Input
-                                id="title"
-                                value={quickEditTitle}
-                                onChange={(e) => setQuickEditTitle(e.target.value)}
-                                className="col-span-3"
-                            />
+                            <div className="col-span-3 w-full">
+                                <Input
+                                    id="title"
+                                    value={quickEditTitle}
+                                    onChange={(e) => setQuickEditTitle(e.target.value)}
+                                />
+                            </div>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <label htmlFor="status" className="text-right text-sm font-medium">
