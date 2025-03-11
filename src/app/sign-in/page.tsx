@@ -6,6 +6,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/shared/lib/supabase/client"
+import Link from "next/link"
 
 export default function SignIn() {
   const [formData, setFormData] = useState({ email: "", password: "" })
@@ -51,7 +52,7 @@ export default function SignIn() {
     try {
       const origin = window.location.origin;
       const supabase = createClient();
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { data, } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${origin}/api/auth/callback`,
@@ -117,9 +118,9 @@ export default function SignIn() {
         </form>
         <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-6 w-full">
           New to FlowBlog?{" "}
-          <a href="/sign-up" className="dark:text-blue-400 text-blue-600 underline underline-offset-2 font-medium">
+          <Link href="/sign-up" className="dark:text-blue-400 text-blue-600 underline underline-offset-2 font-medium">
             Create an account
-          </a>
+          </Link>
         </p>
         <hr className="h-0 border-t mt-8 dark:border-zinc-600 border-zinc-300" />
         <p className="-mt-2.5 text-xs text-center dark:text-zinc-400 text-zinc-500">
