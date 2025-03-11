@@ -55,6 +55,10 @@ export async function createComment({
         return { success: false, error: error.message }
     }
 
+    const { data: countData, error: countError } = await supabaseClient.rpc("adjust_comment_count", { post_id: postId, increment: true })
+    console.log(countData)
+    console.log(countError)
+
     console.log("Comment created successfully:", data)
     return { success: true, comment: data as Comment }
 }
@@ -115,7 +119,6 @@ export async function deleteComment(commentId: string): Promise<boolean> {
             .maybeSingle()
 
 
-
         if (fetchError) {
             console.error("[deleteComment] Error fetching comment:", fetchError.message)
             throw new Error(`Error fetching comment: ${fetchError.message}`)
@@ -127,6 +130,8 @@ export async function deleteComment(commentId: string): Promise<boolean> {
         }
 
         console.log("[deleteComment] Comment found, proceeding with deletion...")
+        const post_id = existingComment.post_id
+
 
         // Delete the comment
         const { error: deleteError } = await supabaseClient
@@ -141,6 +146,9 @@ export async function deleteComment(commentId: string): Promise<boolean> {
             console.error("[deleteComment] Error deleting comment:", deleteError.message)
             throw new Error(`Error deleting comment: ${deleteError.message}`)
         }
+
+        await supabaseClient.rpc("adjust_comment_count", { post_id: post_id, increment: false })
+
 
         console.log("[deleteComment] Comment deleted successfully!")
         return true
@@ -179,3 +187,20 @@ export async function buildCommentsTree(comments: Comment[]): Promise<CommentWit
     return roots
 }
 
+
+export async function getUserComments(id: string): Promise<Comment[]> {
+    try {
+        const { data, error } = await supabaseClient
+            .from("comments")
+            .select("*") // Select all columns; modify this if you need specific fields
+            .eq("profile_id", id)
+            .order("created_at", { ascending: false }) // Order by latest comments first
+
+        if (error) throw error
+
+        return data || []
+    } catch (error) {
+        console.error("Error fetching user comments:", error)
+        return []
+    }
+}
