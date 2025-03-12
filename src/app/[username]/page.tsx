@@ -43,12 +43,12 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
     // Use full_name if available
     const displayName = profile.full_name?.trim()
     const profileUrl = `https://flowblog.com/${profile.full_name}`
-    const bio = `${displayName ? `${displayName}'s profile on FlowBlog` : 'A FlowBlog profile'}`;
+    const bio = `${displayName ? `${displayName}'s profile on FlowBlog` : "A FlowBlog profile"}`
     // External Links (Only include if valid)
     const links: string[] = []
     if (profile.github) links.push(`GitHub: ${profile.github}`)
     if (profile.website) links.push(`Website: ${profile.website}`)
-    const extraDescription = links.length ? ` | Explore more from ${displayName}: ${links.join(", ")}` : '';
+    const extraDescription = links.length ? ` | Explore more from ${displayName}: ${links.join(", ")}` : ""
 
     return {
         title: `${displayName} (@${(profile?.full_name as string).trim()}) | FlowBlog`,
@@ -74,10 +74,10 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 
 export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
     const { username } = await params
-    const profile = await getProfileFromUsername(username) as Profile | null;
+    const profile = (await getProfileFromUsername(username)) as Profile | null
 
     if (!profile) {
-        return notFound(); // Ensure we handle missing profiles safely
+        return notFound() // Ensure we handle missing profiles safely
     }
     const posts = await getPosts(profile?.id as string, "published")
     const comments = await getUserComments(profile?.id as string)
@@ -188,85 +188,92 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                         </TabsList>
 
                         <TabsContent value="articles">
-                            {posts.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-16 text-center">
-                                    <BookIcon className="w-16 h-16 text-muted-foreground/30 mb-4" />
-                                    <h3 className="text-xl font-medium mb-2">No articles yet</h3>
-                                    <p className="text-muted-foreground max-w-md">
-                                        This user hasn&apos;t published any articles yet. Check back later for new content.
-                                    </p>
-                                </div>
-                            ) : (
-                                <div className="space-y-10">
-                                    {/* Featured article - first article gets special treatment */}
-                                    {posts.length > 0 && (
-                                        <div className="mb-8">
-                                            <FeaturedArticleCard article={posts[0]} username={username} />
-                                        </div>
-                                    )}
+                            <div>
+                                {posts.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                                        <BookIcon className="w-16 h-16 text-muted-foreground/30 mb-4" />
+                                        <h3 className="text-xl font-medium mb-2">No articles yet</h3>
+                                        <p className="text-muted-foreground max-w-md">
+                                            This user hasn&apos;t published any articles yet. Check back later for new content.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-10">
+                                        {/* Featured article - first article gets special treatment */}
+                                        {posts.length > 0 && (
+                                            <div className="mb-8">
+                                                <FeaturedArticleCard article={posts[0]} username={username} />
+                                            </div>
+                                        )}
 
-                                    {/* Remaining articles in horizontal layout */}
-                                    {posts.length > 1 && (
-                                        <div className="space-y-6">
-                                            {posts.slice(1).map((article) => (
-                                                <HorizontalArticleCard key={article.id} article={article} username={username} />
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                                        {/* Remaining articles in horizontal layout */}
+                                        {posts.length > 1 && (
+                                            <div className="space-y-6">
+                                                {posts.slice(1).map((article) => (
+                                                    <HorizontalArticleCard key={article.id} article={article} username={username} />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </TabsContent>
 
                         <TabsContent value="comments">
-                            {comments.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-16 text-center">
-                                    <MessageSquareIcon className="w-16 h-16 text-muted-foreground/30 mb-4" />
-                                    <h3 className="text-xl font-medium mb-2">No comments yet</h3>
-                                    <p className="text-muted-foreground max-w-md">
-                                        This user hasn&apos;t made any comments yet. Check back later for new activity.
-                                    </p>
-                                </div>
-                            ) : (
-                                <div className="space-y-6">
-                                    {comments.map(async (comment: Comment) => {
-                                        const post = await getPost(comment.post_id)
+                            <div>
+                                {comments.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                                        <MessageSquareIcon className="w-16 h-16 text-muted-foreground/30 mb-4" />
+                                        <h3 className="text-xl font-medium mb-2">No comments yet</h3>
+                                        <p className="text-muted-foreground max-w-md">
+                                            This user hasn&apos;t made any comments yet. Check back later for new activity.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {comments.map(async (comment: Comment) => {
+                                            const post = await getPost(comment.post_id)
 
-                                        return (
-                                            <Card key={comment.id} className="group hover:shadow-md transition-all">
-                                                <CardHeader>
-                                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                                        <div className="flex items-center gap-2">
-                                                            <CalendarIcon className="w-3 h-3" />
-                                                            <time dateTime={comment.created_at}>
-                                                                {new Date(comment.created_at).toLocaleDateString("en-US", {
-                                                                    year: "numeric",
-                                                                    month: "short",
-                                                                    day: "numeric",
-                                                                })}
-                                                            </time>
+                                            return (
+                                                <Card key={comment.id} className="group hover:shadow-md transition-all">
+                                                    <CardHeader>
+                                                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                                            <div className="flex items-center gap-2">
+                                                                <CalendarIcon className="w-3 h-3" />
+                                                                <time dateTime={comment.created_at}>
+                                                                    {new Date(comment.created_at).toLocaleDateString("en-US", {
+                                                                        year: "numeric",
+                                                                        month: "short",
+                                                                        day: "numeric",
+                                                                    })}
+                                                                </time>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <CardTitle className="mt-2 text-base flex items-center gap-2">
-                                                        <CornerDownRightIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                                                        <a href={`/${username}/${post.slug}`} className="hover:text-primary transition-colors line-clamp-1">
-                                                            On: {post.title}
-                                                        </a>
-                                                    </CardTitle>
-                                                </CardHeader>
-                                                <CardContent>
-                                                    <blockquote className="border-l-2 pl-4 italic text-muted-foreground line-clamp-2 text-sm">
-                                                        {post.excerpt}
-                                                    </blockquote>
-                                                    <div className="relative bg-muted/30 p-4 mt-3 rounded-lg">
-                                                        <div className="absolute -top-2 left-4 w-4 h-4 bg-muted/30 rotate-45"></div>
-                                                        <p className="text-sm">{comment.text}</p>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        )
-                                    })}
-                                </div>
-                            )}
+                                                        <CardTitle className="mt-2 text-base flex items-center gap-2">
+                                                            <CornerDownRightIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                                            <a
+                                                                href={`/${username}/${post.slug}`}
+                                                                className="hover:text-primary transition-colors line-clamp-1"
+                                                            >
+                                                                On: {post.title}
+                                                            </a>
+                                                        </CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <blockquote className="border-l-2 pl-4 italic text-muted-foreground line-clamp-2 text-sm">
+                                                            {post.excerpt}
+                                                        </blockquote>
+                                                        <div className="relative bg-muted/30 p-4 mt-3 rounded-lg">
+                                                            <div className="absolute -top-2 left-4 w-4 h-4 bg-muted/30 rotate-45"></div>
+                                                            <p className="text-sm">{comment.text}</p>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            )
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                         </TabsContent>
                     </Tabs>
                 </div>
@@ -276,7 +283,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 }
 
 // Featured article component - large, prominent display for the first article
-async function FeaturedArticleCard({ article, username }: { article: BlogPost, username: string }) {
+async function FeaturedArticleCard({ article, username }: { article: BlogPost; username: string }) {
     const readTime = Math.ceil(sanitizeMarkdown(article.content).split(" ").length / 200) || 1
 
     return (
@@ -330,7 +337,7 @@ async function FeaturedArticleCard({ article, username }: { article: BlogPost, u
                             <div className="flex items-center gap-2 mt-4 mb-4 flex-wrap">
                                 <TagIcon className="w-3 h-3 text-muted-foreground" />
                                 {article.tags.map((tag: string) => (
-                                    <Badge key={tag} variant="secondary" className="font-normal text-xs">
+                                    <Badge key={tag} variant="outline" className="font-normal text-xs">
                                         {tag}
                                     </Badge>
                                 ))}
@@ -356,7 +363,6 @@ async function FeaturedArticleCard({ article, username }: { article: BlogPost, u
                             </div>
 
                             <a href={`/${username}/${article.slug}`} className="flex items-center gap-1 text-primary hover:underline">
-
                                 <span className="flex gap-2 items-center">
                                     Read More
                                     <ArrowRightIcon className="w-3 h-3" />
@@ -371,7 +377,7 @@ async function FeaturedArticleCard({ article, username }: { article: BlogPost, u
 }
 
 // Horizontal article card component for remaining articles
-async function HorizontalArticleCard({ article, username }: { article: BlogPost, username: string }) {
+async function HorizontalArticleCard({ article, username }: { article: BlogPost; username: string }) {
     const readTime = Math.ceil(sanitizeMarkdown(article.content).split(" ").length / 200) || 1
 
     return (
@@ -425,7 +431,7 @@ async function HorizontalArticleCard({ article, username }: { article: BlogPost,
                             <div className="flex items-center gap-2 mt-2 mb-4 flex-wrap">
                                 <TagIcon className="w-3 h-3 text-muted-foreground" />
                                 {article.tags.slice(0, 3).map((tag: string) => (
-                                    <Badge key={tag} variant="secondary" className="font-normal text-xs">
+                                    <Badge key={tag} variant="outline" className="font-normal text-xs">
                                         {tag}
                                     </Badge>
                                 ))}

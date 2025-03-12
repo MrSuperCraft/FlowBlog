@@ -26,19 +26,16 @@ interface BlogPost {
 }
 
 const fetchPosts = async (page: number, tag?: string): Promise<BlogPost[]> => {
-  const url = tag
-    ? `/api/posts?page=${page}&post_limit=10&tag=${tag}`
-    : `/api/posts?page=${page}&post_limit=10`;
+  const url = tag ? `/api/posts?page=${page}&post_limit=10&tag=${tag}` : `/api/posts?page=${page}&post_limit=10`
 
-  const res = await fetch(url);
+  const res = await fetch(url)
 
   if (!res.ok) {
-    throw new Error("Failed to fetch posts");
+    throw new Error("Failed to fetch posts")
   }
 
-  return res.json();
-};
-
+  return res.json()
+}
 
 export default function BlogFeed({ tag }: { tag?: string }) {
   const [posts, setPosts] = useState<BlogPost[]>([])
@@ -55,7 +52,12 @@ export default function BlogFeed({ tag }: { tag?: string }) {
       if (newPosts.length === 0) {
         setHasMore(false)
       } else {
-        setPosts((prevPosts) => [...prevPosts, ...newPosts])
+        // Add deduplication logic to prevent duplicate posts
+        setPosts((prevPosts) => {
+          const existingIds = new Set(prevPosts.map((post) => post.id))
+          const uniqueNewPosts = newPosts.filter((post) => !existingIds.has(post.id))
+          return [...prevPosts, ...uniqueNewPosts]
+        })
         setPage((prevPage) => prevPage + 1)
       }
     } catch (error) {
@@ -67,8 +69,10 @@ export default function BlogFeed({ tag }: { tag?: string }) {
   }, [page, loading, hasMore, tag])
 
   useEffect(() => {
+    // Only load posts on initial mount
     loadMorePosts()
-  }, [loadMorePosts])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty dependency array to run only once
 
   useEffect(() => {
     const handleScroll = () => {
