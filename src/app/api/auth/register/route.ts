@@ -39,17 +39,18 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("Attempting to sign up with email and password...");
-    const { error } = await supabase.auth.signUp({
+    const { data: { user }, error } = await supabase.auth.signUp({
       email,
       password,
-    });
+    },);
 
     if (error) {
       console.error("Sign-up failed:", error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    console.log("Sign-up success, redirecting to sign-in page");
+    console.log("Sign-up success:", user);
+    console.log("Redirecting to sign-in page");
     return NextResponse.redirect(new URL('/sign-in', request.url));
   } catch (err) {
     console.error("Internal server error:", err);

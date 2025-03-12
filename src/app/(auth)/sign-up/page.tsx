@@ -33,20 +33,7 @@ export default function SignUp() {
             form.append("email", formData.email)
             form.append("password", formData.password)
 
-            const res = await fetch("/api/auth/register", {
-                method: "POST",
-                // Don't set Content-Type header when using FormData
-                // The browser will automatically set it with the boundary
-                body: form,
-                credentials: "same-origin",
-            })
-
-            if (!res.ok) {
-                const errorData = await res.json()
-                throw new Error(errorData.error || "Registration failed")
-            }
-
-            router.push("/dashboard")
+            throw new Error("Sign ups with email & password are temporarily disabled.")
         } catch (err) {
             setError((err as Error).message)
         } finally {

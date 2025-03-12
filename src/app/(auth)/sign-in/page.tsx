@@ -29,19 +29,7 @@ export default function SignIn() {
     setError(null)
 
     try {
-      const response = await fetch("/api/auth/signin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-        credentials: "same-origin",
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Invalid email or password.")
-      }
-
-      router.push("/dashboard")
+      throw new Error("Sign ups with email & password are temporarily disabled.")
     } catch (err) {
       setError((err as Error).message)
     } finally {
