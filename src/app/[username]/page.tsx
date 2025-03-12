@@ -79,7 +79,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     if (!profile) {
         return notFound() // Ensure we handle missing profiles safely
     }
-    const posts = await getPosts(profile?.id as string, "published")
+    const posts = await getPosts(profile?.id as string, "published", true)
     const comments = await getUserComments(profile?.id as string)
 
     // Format the username for the avatar fallback
@@ -92,7 +92,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         : username.substring(0, 2).toUpperCase()
 
     return (
-        <>
+        <div>
             <Header>
                 <ModeToggle />
             </Header>
@@ -278,7 +278,31 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                     </Tabs>
                 </div>
             </section>
-        </>
+            <footer className="bg-neutral-100 dark:bg-neutral-900 py-8 mt-16">
+                <div className="container max-w-6xl mx-auto px-8">
+                    <div className="flex flex-col md:flex-row justify-between items-center">
+                        <div className="text-center md:text-left mb-4 md:mb-0">
+                            <h2 className="text-lg font-bold">FlowBlog</h2>
+                            <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} FlowBlog. All rights reserved.</p>
+                        </div>
+                        <div className="flex gap-4">
+                            <Link href="/about" className="text-sm text-primary hover:underline">
+                                About
+                            </Link>
+                            <Link href="/contact" className="text-sm text-primary hover:underline">
+                                Contact
+                            </Link>
+                            <Link href="/privacy" className="text-sm text-primary hover:underline">
+                                Privacy Policy
+                            </Link>
+                            <Link href="/terms" className="text-sm text-primary hover:underline">
+                                Terms of Service
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
     )
 }
 

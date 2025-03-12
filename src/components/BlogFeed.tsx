@@ -8,6 +8,7 @@ import { Heart, Loader, MessageCircle, Share2, Eye, Calendar } from "lucide-reac
 import { formatDistanceToNow } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
+import Image from "next/image"
 
 interface BlogPost {
   id: string
@@ -102,14 +103,17 @@ export default function BlogFeed({ tag }: { tag?: string }) {
 
   return (
     <div className="space-y-8 px-2 md:px-8 lg:px-24 pb-12">
-      {posts.map((post) => (
+      {posts.map((post, index) => (
         <Link
           key={post.id}
           href={`/${post.author_full_name}/${post.slug}`}
           className="block transition-transform duration-200 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-900 rounded-lg"
         >
           <Card className="overflow-hidden border-gray-200 dark:border-neutral-800 hover:border-gray-300 dark:hover:border-gray-600 transition-transform duration-200 dark:bg-neutral-900">
-            <CardHeader className="pb-2 pt-6 px-6">
+            {index === 0 && post.cover_image && (
+              <Image src={post.cover_image} alt={post.title} className="w-full h-64 object-cover" width={500} height={200} />
+            )}
+            <CardHeader className="pb-2 pt-2 px-6">
               <div className="flex items-center space-x-2 mb-3">
                 <Avatar src={post.author_avatar_url} alt={post.author_full_name} fallback="User Avatar" />
 

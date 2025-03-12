@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { notFound, useRouter } from "next/navigation"
 import { getPostBySlug } from "@/actions/post"
 import type { PostType } from "@/shared/types"
@@ -19,6 +19,7 @@ const ArticlePage = () => {
     const [unauthorized, setUnauthorized] = useState(false)
     const router = useRouter()
     const { user, loading: authLoading } = useUser() // Get current authenticated user
+    const hasFetched = useRef(false) // Ref to track if fetch has been performed
 
     useEffect(() => {
         const username = window.location.pathname.split("/")[1]
@@ -57,8 +58,9 @@ const ArticlePage = () => {
             }
         }
 
-        // Only fetch the article once auth state is determined
-        if (!authLoading) {
+        // Only fetch the article once auth state is determined and fetch has not been performed
+        if (!authLoading && !hasFetched.current) {
+            hasFetched.current = true
             fetchArticle()
         }
     }, [router, user, authLoading])
@@ -144,7 +146,7 @@ const ArticlePage = () => {
             {article.status !== "published" && (
                 <div className="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-4 py-2 mt-14 text-center">
                     You&apos;re viewing {article.status === "draft" ? "a drafted" : "an archived"} article. This is only visible to you as the author.
-                </div>
+                </div >
             )}
 
             <ArticleInner
@@ -159,4 +161,3 @@ const ArticlePage = () => {
 }
 
 export default ArticlePage
-

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function ModeToggle() {
-  const { setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
   return (
     <DropdownMenu>
@@ -24,13 +24,15 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem onClick={() => setTheme("light")} className="flex items-center gap-2">
+          {resolvedTheme === "light" && <div className="size-2 bg-primary/50 rounded-full" />}
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem onClick={() => setTheme("dark")} className="flex items-center gap-2">
+          {resolvedTheme === "dark" && <div className="size-2 bg-primary/50 rounded-full" />}
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem onClick={() => setTheme("system")} className="flex items-center gap-2">
           System
         </DropdownMenuItem>
       </DropdownMenuContent>
