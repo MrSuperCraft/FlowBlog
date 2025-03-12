@@ -10,7 +10,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { ChevronDown, Home, User, List, Settings, PieChart, Box } from "lucide-react";
+import { ChevronDown, Home, User, List, Settings, PieChart } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -23,10 +23,6 @@ type NavItem = {
     subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
-const othersItems: NavItem[] = [
-    { icon: <PieChart className="h-5 w-5" />, name: "Analytics", path: "/dashboard/analytics" },
-    { icon: <Box className="h-5 w-5" />, name: "Media", path: "/media" },
-];
 
 const AppSidebar: React.FC = () => {
     const { isExpanded, isMobileOpen, openSubmenu, toggleMobileSidebar, toggleSubmenu } =
@@ -47,6 +43,7 @@ const AppSidebar: React.FC = () => {
                 { name: "New Post", path: "/dashboard/new" },
             ],
         },
+        { icon: <PieChart className="h-5 w-5" />, name: "Analytics", path: "/dashboard/analytics" },
         { icon: <Settings className="h-5 w-5" />, name: "Settings", path: "/dashboard/settings" },
     ];
 
@@ -132,7 +129,6 @@ const AppSidebar: React.FC = () => {
                 <nav className={cn("px-2", !isExpanded && "px-0")}>
                     {renderMenuItems(navItems)}
                     <div className="my-4 h-px bg-border" />
-                    {renderMenuItems(othersItems)}
                 </nav>
             </ScrollArea>
         </>

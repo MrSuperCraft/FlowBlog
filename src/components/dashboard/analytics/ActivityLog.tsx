@@ -58,13 +58,13 @@ export default function ActivityLog() {
 
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
+        <Card className="h-full">
+            <CardHeader className="space-y-1">
+                <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+                    <Calendar className="h-4 w-4 md:h-5 md:w-5" />
                     Recent Activity
                 </CardTitle>
-                <CardDescription>Latest comments and reactions</CardDescription>
+                <CardDescription className="text-sm">Latest comments and reactions</CardDescription>
             </CardHeader>
             <CardContent>
                 {loading ? (
@@ -74,27 +74,35 @@ export default function ActivityLog() {
                 ) : activityData.length === 0 ? (
                     <p className="text-muted-foreground text-sm">No recent activity.</p>
                 ) : (
-                    <div className="space-y-4 max-h-[300px] overflow-auto pr-2">
+                    <div className="space-y-3 max-h-[300px] md:max-h-[400px] overflow-auto pr-2 scrollbar-thin">
                         {activityData.map((activity, index) => (
-                            <div key={index} className="flex items-start gap-3 pb-3 border-b last:border-0">
+                            <div key={index} className="flex items-start gap-2 md:gap-3 pb-3 border-b last:border-0">
                                 <div className="mt-1">
                                     {activity.type === "comment" ? (
-                                        <MessageSquare className="h-4 w-4 text-blue-500" />
+                                        <MessageSquare className="h-3.5 w-3.5 md:h-4 md:w-4 text-blue-500" />
                                     ) : (
-                                        <ThumbsUp className="h-4 w-4 text-green-500" />
+                                        <ThumbsUp className="h-3.5 w-3.5 md:h-4 md:w-4 text-green-500" />
                                     )}
                                 </div>
                                 <div className="flex-1 space-y-1">
-                                    <div className="flex justify-between items-start">
-                                        <p className="font-medium text-sm">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <p className="font-medium text-xs md:text-sm truncate">
                                             {userProfiles[activity.profile_id] || "Unknown User"}
                                         </p>
-                                        <span className="text-xs text-muted-foreground">{formatTimestamp(activity.created_at)}</span>
+                                        <span className="text-[10px] md:text-xs text-muted-foreground whitespace-nowrap">
+                                            {formatTimestamp(activity.created_at)}
+                                        </span>
                                     </div>
                                     {activity.type === "comment" && "text" in activity && (
-                                        <p className="text-sm text-muted-foreground">Commented: {activity.text}</p>
+                                        <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">
+                                            Commented: {activity.text}
+                                        </p>
                                     )}
-                                    {activity.type === "like" && <p className="text-sm text-muted-foreground">Liked this article</p>}
+                                    {activity.type === "like" && (
+                                        <p className="text-xs md:text-sm text-muted-foreground">
+                                            Liked this article
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         ))}

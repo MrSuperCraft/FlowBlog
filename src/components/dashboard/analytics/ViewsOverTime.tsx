@@ -92,30 +92,38 @@ const ViewsOverTime = ({ timeRange = "7d" }: { timeRange: ViewTimeRangeOptions }
 
     return (
         <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <div className="space-y-1">
-                    <CardTitle>Views Over Time</CardTitle>
-                    <CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between p-3 sm:p-4 pb-2">
+                <div className="space-y-0.5">
+                    <CardTitle className="text-base sm:text-lg">Views Over Time</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
                         Total views: {viewsData.reduce((sum, item) => sum + item.views_count, 0)}
                     </CardDescription>
                 </div>
             </CardHeader>
-            <CardContent className="pt-4">
+            <CardContent className="pt-2 sm:pt-4">
                 <ChartContainer
                     config={chartConfig}
-                    className="h-[300px] w-full"
+                    className="h-[200px] sm:h-[250px] lg:h-[300px] w-full"
                 >
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={filteredData}>
+                        <BarChart data={filteredData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                             <CartesianGrid vertical={false} />
                             <XAxis
                                 dataKey="time_period"
                                 tickFormatter={formatDate}
                                 tickLine={false}
                                 axisLine={false}
-                                tickMargin={10}
+                                tickMargin={8}
+                                fontSize={12}
+                                interval="preserveStartEnd"
                             />
-                            <YAxis tickLine={false} axisLine={false} width={40} />
+                            <YAxis
+                                tickLine={false}
+                                axisLine={false}
+                                width={30}
+                                fontSize={12}
+                                tickFormatter={(value) => value >= 1000 ? `${value / 1000}k` : value}
+                            />
                             <ChartTooltip
                                 cursor={false}
                                 content={<ChartTooltipContent hideLabel />}
@@ -124,15 +132,15 @@ const ViewsOverTime = ({ timeRange = "7d" }: { timeRange: ViewTimeRangeOptions }
                                 dataKey="views_count"
                                 fill="var(--color-views)"
                                 radius={[4, 4, 0, 0]}
-                                barSize={timeRange === "24h" ? 30 : timeRange === "7d" ? 20 : 10}
+                                barSize={timeRange === "24h" ? 20 : timeRange === "7d" ? 15 : 8}
                             />
                         </BarChart>
                     </ResponsiveContainer>
                 </ChartContainer>
             </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 font-medium leading-none">
-                    Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+            <CardFooter className="flex-col items-start gap-1 text-xs sm:text-sm p-3 sm:p-4">
+                <div className="flex gap-1.5 font-medium leading-none">
+                    Trending up by 5.2% this month <TrendingUp className="h-3.5 w-3.5" />
                 </div>
                 <div className="leading-none text-muted-foreground">
                     Showing total visitors for the selected period

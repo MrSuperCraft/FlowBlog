@@ -51,24 +51,31 @@ export default function ReferrersCard() {
     }, []);
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Link className="h-5 w-5" />
+        <Card className="h-full">
+            <CardHeader className="space-y-1">
+                <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+                    <Link className="h-4 w-4 md:h-5 md:w-5" />
                     Referrers
                 </CardTitle>
-                <CardDescription>Traffic sources for this article</CardDescription>
+                <CardDescription className="text-sm">Traffic sources for this article</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                     {referrersData.map(({ source, count, percentage }) => (
-                        <div key={source} className="flex items-center">
-                            <div className="w-1/3 font-medium">{source}</div>
-                            <div className="w-2/3 flex items-center gap-2">
+                        <div key={source} className="flex items-center gap-2">
+                            <div className="min-w-[80px] md:min-w-[100px] text-sm md:text-base font-medium truncate">
+                                {source}
+                            </div>
+                            <div className="flex-1 flex items-center gap-2">
                                 <div className="w-full bg-muted rounded-full h-2">
-                                    <div className="bg-primary h-2 rounded-full" style={{ width: `${percentage}%` }} />
+                                    <div 
+                                        className="bg-primary h-2 rounded-full transition-all duration-500" 
+                                        style={{ width: `${percentage}%` }} 
+                                    />
                                 </div>
-                                <span className="text-sm text-muted-foreground w-12">{count}</span>
+                                <span className="text-xs md:text-sm text-muted-foreground min-w-[32px] text-right">
+                                    {count}
+                                </span>
                             </div>
                         </div>
                     ))}

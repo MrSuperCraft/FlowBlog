@@ -18,7 +18,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 className={`
           flex-1 transition-all duration-300 ease-in-out
           ${isMobileOpen ? "ml-0" : ""}
-          ${isExpanded ? "md:pl-64" : "md:pl-20"}
+          ${isExpanded ? "md:pl-64" : "md:pl-16"}
         `}
             >
                 {/* Header */}
