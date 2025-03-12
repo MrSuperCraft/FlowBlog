@@ -260,6 +260,21 @@ export function EditPostPage({ postData }: { postData: PostType }) {
         }
     }
 
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const file = e.dataTransfer.files?.[0];
+        if (file) {
+            setCoverImageUrl(URL.createObjectURL(file)); // For preview
+        }
+    };
+
+
     const handlePublish = () => handleSave("published")
     const handleUpdate = () => handleSave()
 
@@ -331,7 +346,12 @@ export function EditPostPage({ postData }: { postData: PostType }) {
                             </Button>
                         </div>
                     ) : (
-                        <div className="border border-dashed rounded-md p-8 text-center">
+                        <div
+                            className="border border-dashed rounded-md p-8 text-center relative cursor-pointer"
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                            onClick={() => document.getElementById("cover-image-upload")?.click()}
+                        >
                             <div className="flex flex-col items-center gap-2">
                                 <Upload className="h-8 w-8 text-muted-foreground" />
                                 <p className="text-sm font-medium">Drag and drop or click to upload</p>
@@ -341,7 +361,6 @@ export function EditPostPage({ postData }: { postData: PostType }) {
                                     variant="secondary"
                                     size="sm"
                                     className="mt-2"
-                                    onClick={() => document.getElementById("cover-image-upload")?.click()}
                                 >
                                     Select Image
                                 </Button>
