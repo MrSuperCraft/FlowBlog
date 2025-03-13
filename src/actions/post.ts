@@ -1,4 +1,4 @@
-import type { PostInsert, PostType, PostUpdate } from "@/shared/types"
+import type { BlogPost, PostInsert, PostType, PostUpdate } from "@/shared/types"
 import { supabaseClient } from '@/shared/lib/supabase/client'
 import { toast } from 'sonner'
 import { deleteCoverImage } from "./image"
@@ -17,17 +17,27 @@ export async function createPost(post: PostInsert) {
 }
 
 // Update an existing post
-export async function updatePost(id: string, updates: PostUpdate) {
+export async function updatePost(id: string, updates: PostUpdate): Promise<BlogPost> {
     try {
-        const { data, error } = await supabaseClient.from('posts').update(updates).eq('id', id).single()
-        if (error) throw error
-        toast.success('Post updated successfully')
-        return data
+        const { data, error } = await supabaseClient
+            .from("posts")
+            .update(updates)
+            .eq("id", id)
+            .select()
+            .single(); // Ensures it returns a single object
+
+        if (error) throw error;
+        if (!data) throw new Error("Supabase update did not return any data");
+
+        toast.success("Post updated successfully");
+        return data as BlogPost;
     } catch (error) {
-        toast.error('Failed to update post')
-        throw error
+        toast.error("Failed to update post");
+        throw error;
     }
 }
+
+
 
 // Delete a post by ID
 export async function deletePost(id: string) {
