@@ -150,12 +150,10 @@ export function CommentItem({
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuItem onClick={() => setIsEditing(true)}>Edit</DropdownMenuItem>
-                                    <DropdownMenuItem
+                                    <DropdownMenuItem 
                                         className="text-destructive focus:text-destructive"
                                         onClick={() => setShowDeleteAlert(true)}
-                                    >
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Delete
+                                    >  Delete
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>

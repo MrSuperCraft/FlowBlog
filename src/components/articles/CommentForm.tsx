@@ -112,7 +112,7 @@ export function CommentForm({
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={placeholder}
-                className="min-h-[80px] w-full"
+                className="min-h-[80px] w-full resize-none"
                 disabled={isSubmitting}
                 aria-label="Comment content"
             />
