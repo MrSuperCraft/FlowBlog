@@ -31,7 +31,8 @@ import { notFound } from "next/navigation"
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }): Promise<Metadata> {
     const { username } = await params
-    const profile: Profile | null = await getProfileFromUsername(username)
+    const cleanUser = decodeURIComponent(username)
+    const profile: Profile | null = await getProfileFromUsername(cleanUser)
 
     if (!profile) {
         return {
