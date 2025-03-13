@@ -4,6 +4,50 @@ import LandingSidebar from "@/components/LandingSidebar";
 import RightContent from "@/components/RightContent";
 import { ModeToggle } from "@/components/ThemeToggle";
 import { Separator } from "@/components/ui/separator";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ tag: string }> }): Promise<Metadata> {
+    const { tag } = await params;
+    const decodedTag = decodeURIComponent(tag); // Ensure readability
+
+    return {
+        title: `#${decodedTag}`,
+        description: `Explore blog posts tagged with #${decodedTag} on FlowBlog. Read insights from developers, tech enthusiasts, and writers sharing their knowledge and experiences.`,
+        keywords: [
+            decodedTag,
+            `${decodedTag} blogs`,
+            `${decodedTag} articles`,
+            `${decodedTag} posts`,
+            "FlowBlog",
+            "developer blogging",
+            "technical articles",
+            "developer journals"
+        ],
+        openGraph: {
+            title: `#${decodedTag}`,
+            description: `Browse the latest blog posts tagged #${decodedTag} on FlowBlog. Stay updated with insights and technical discussions.`,
+            url: `${process.env.NEXT_PUBLIC_BASE_URL}/t/${decodedTag}`,
+            siteName: "FlowBlog",
+            images: [
+                {
+                    url: `${process.env.NEXT_PUBLIC_BASE_URL}/og-image`,
+                    width: 1200,
+                    height: 630,
+                    alt: `FlowBlog - Posts tagged #${decodedTag}`
+                }
+            ],
+            type: "website"
+        },
+        twitter: {
+            card: "summary_large_image",
+            site: "@ItamarHanan",
+            title: `#${decodedTag}`,
+            description: `Discover the latest discussions and insights on FlowBlog under the #${decodedTag} tag.`,
+            images: [`${process.env.NEXT_PUBLIC_BASE_URL}/og-image`]
+        }
+    };
+}
+
 
 export default async function Page({ params }: { params: Promise<{ tag: string }> }) {
     const { tag } = await params;

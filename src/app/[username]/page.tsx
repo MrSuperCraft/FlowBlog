@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation"
 import { getProfileFromId, getProfileFromUsername } from "@/actions/user"
 import type { Metadata } from "next"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -18,6 +17,7 @@ import {
     TagIcon,
     CornerDownRightIcon,
     ArrowRightIcon,
+    Feather,
 } from "lucide-react"
 import Link from "next/link"
 import { Header } from "@/components/Header"
@@ -27,6 +27,7 @@ import { sanitizeMarkdown } from "@/shared/lib/utils"
 import type { BlogPost, Comment, Profile } from "@/shared/types"
 import { getUserComments } from "@/actions/comment"
 import Image from "next/image"
+import { notFound } from "next/navigation"
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }): Promise<Metadata> {
     const { username } = await params
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 
     if (!profile) {
         return {
-            title: "User Not Found | FlowBlog",
+            title: "User Not Found",
             description: "The requested user profile could not be found.",
             robots: "noindex, nofollow",
         }
@@ -42,7 +43,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 
     // Use full_name if available
     const displayName = profile.full_name?.trim()
-    const profileUrl = `https://flowblog.com/${profile.full_name}`
+    const profileUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/${profile.full_name}`
     const bio = `${displayName ? `${displayName}'s profile on FlowBlog` : "A FlowBlog profile"}`
     // External Links (Only include if valid)
     const links: string[] = []
@@ -51,13 +52,13 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
     const extraDescription = links.length ? ` | Explore more from ${displayName}: ${links.join(", ")}` : ""
 
     return {
-        title: `${displayName} (@${(profile?.full_name as string).trim()}) | FlowBlog`,
+        title: `${displayName} (@${(profile?.full_name as string).trim()})`,
         description: bio + extraDescription,
         alternates: {
             canonical: profileUrl,
         },
         openGraph: {
-            title: `${displayName} (@${(profile?.full_name as string).trim()}) | FlowBlog`,
+            title: `${displayName} (@${(profile?.full_name as string).trim()})`,
             description: bio,
             url: profileUrl,
             type: "profile",
@@ -65,7 +66,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
         },
         twitter: {
             card: "summary_large_image",
-            title: `${displayName} (@${(profile?.full_name as string).trim()}) | FlowBlog`,
+            title: `${displayName} (@${(profile?.full_name as string).trim()})`,
             description: bio,
             images: profile.avatar_url ? [profile.avatar_url] : undefined,
         },
@@ -77,7 +78,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     const profile = (await getProfileFromUsername(username)) as Profile | null
 
     if (!profile) {
-        return notFound() // Ensure we handle missing profiles safely
+        return notFound();
     }
     const posts = await getPosts(profile?.id as string, "published", true)
     const comments = await getUserComments(profile?.id as string)
@@ -282,7 +283,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                 <div className="container max-w-6xl mx-auto px-8">
                     <div className="flex flex-col md:flex-row justify-between items-center">
                         <div className="text-center md:text-left mb-4 md:mb-0">
-                            <h2 className="text-lg font-bold">FlowBlog</h2>
+                            <h2 className="text-lg font-bold flex gap-2"><Feather /> FlowBlog</h2>
                             <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} FlowBlog. All rights reserved.</p>
                         </div>
                         <div className="flex gap-4">
@@ -433,7 +434,7 @@ async function HorizontalArticleCard({ article, username }: { article: BlogPost;
                                     })}
                                 </time>
                             </div>
-                            <span>•</span>
+                            <span>&bull;</span>
                             <div className="flex items-center">
                                 <ClockIcon className="w-3 h-3 mr-1" />
                                 <span>

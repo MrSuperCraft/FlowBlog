@@ -32,7 +32,7 @@ export async function generateMetadata(
         const description = cleanContent.substring(0, 160) + (cleanContent.length > 160 ? '...' : '')
 
         return {
-            title: article.title + " | FlowBlog",
+            title: article.title,
             description: description,
             authors: [{ name: username }],
             openGraph: {
