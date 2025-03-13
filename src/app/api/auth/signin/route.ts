@@ -60,7 +60,6 @@ export async function POST(request: Request) {
     });
 
     if (error || !data) {
-      console.log("Sign-in failed:", error?.message || "No session returned");
       return NextResponse.json(
         { error: error?.message || "Invalid credentials" },
         { status: 401 }
@@ -72,8 +71,7 @@ export async function POST(request: Request) {
     const response = NextResponse.redirect(new URL("/dashboard", request.url));
 
     return response;
-  } catch (err) {
-    console.error("Internal server error:", err);
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

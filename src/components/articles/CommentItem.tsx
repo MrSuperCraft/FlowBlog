@@ -6,7 +6,7 @@ import { Avatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { CommentForm } from "./CommentForm"
-import { MoreHorizontal, Reply, Trash2 } from "lucide-react"
+import { MoreHorizontal, PenBox, Reply, Trash2 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { deleteComment, updateComment, type CommentWithReplies } from "@/actions/comment"
 import { toast } from "sonner"
@@ -59,7 +59,6 @@ export function CommentItem({
 
     const handleDelete = async () => {
         setIsDeleting(true)
-        console.log("[handleDelete] Attempting to delete comment with ID:", comment.id)
 
 
 
@@ -148,14 +147,21 @@ export function CommentItem({
                                         <MoreHorizontal className="h-4 w-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => setIsEditing(true)}>Edit</DropdownMenuItem>
+                                <DropdownMenuContent align="end" className="w-32">
+                                    <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                                        <span className="flex items-center">
+                                            <PenBox className="mr-2 h-4 w-4" />
+                                            Edit
+                                        </span>
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem
                                         className="text-destructive focus:text-destructive"
                                         onClick={() => setShowDeleteAlert(true)}
                                     >
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Delete
+                                        <span className="flex items-center">
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Delete
+                                        </span>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -195,11 +201,11 @@ export function CommentItem({
                                 Reply
                             </Button>
                         ) : (
-                            <LoginCTADropdown>
-                                <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
+                            <LoginCTADropdown className="h-8 px-2 text-xs">
+                                <div className="flex gap-1 items-center">
                                     <Reply className="mr-1 h-3 w-3" />
                                     Reply
-                                </Button>
+                                </div>
                             </LoginCTADropdown>
                         )}
                     </div>

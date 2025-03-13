@@ -24,7 +24,6 @@ export default function ReferrersCard() {
                 .select("referrer")
                 .eq("post_id", articleId);
 
-            console.log(data);
 
             if (error) {
                 console.error("Error fetching referrers:", error);
@@ -68,9 +67,9 @@ export default function ReferrersCard() {
                             </div>
                             <div className="flex-1 flex items-center gap-2">
                                 <div className="w-full bg-muted rounded-full h-2">
-                                    <div 
-                                        className="bg-primary h-2 rounded-full transition-all duration-500" 
-                                        style={{ width: `${percentage}%` }} 
+                                    <div
+                                        className="bg-primary h-2 rounded-full transition-all duration-500"
+                                        style={{ width: `${percentage}%` }}
                                     />
                                 </div>
                                 <span className="text-xs md:text-sm text-muted-foreground min-w-[32px] text-right">

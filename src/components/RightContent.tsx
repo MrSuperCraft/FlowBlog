@@ -37,7 +37,6 @@ export default function RightContent() {
       }
 
       if (data) {
-        console.log('Fetched trending topics:', data);
         setTopics(data);
       }
 

@@ -64,7 +64,6 @@ const ViewsOverTime = ({ timeRange = "7d" }: { timeRange: ViewTimeRangeOptions }
                 // Group the raw data based on the selected timeRange
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const grouped = groupDataByInterval(data as any[], timeRange);
-                console.log("Grouped data:", grouped);
                 setViewsData(grouped);
             } catch (error) {
                 console.error("Error fetching views data:", error);
