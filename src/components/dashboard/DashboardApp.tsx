@@ -48,7 +48,6 @@ const DashboardApp = () => {
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       const user_id = user?.id!
-      console.log("[getTotalMetrics] Fetching metrics for user:", user_id)
 
       // Correctly pass the named parameter
       const { data, error } = await supabase.rpc("sum_user_activity", { user_id })
@@ -60,7 +59,6 @@ const DashboardApp = () => {
       // Now destructure data correctly
       const { views, comments, reactions } = (data && data[0]) || { views: 0, comments: 0, reactions: 0 }
 
-      console.log({ views, comments, reactions })
 
       setPostMetrics({ totalViews: views, totalComments: comments, totalReactions: reactions })
     }

@@ -23,7 +23,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true)
 
   const fetchUserData = useCallback(async () => {
-    console.log("[UserProvider] Fetching user session and profile")
     setLoading(true)
 
     try {
@@ -31,25 +30,20 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       const { data: { user }, error } = await supabase.auth.getUser()
 
       if (error || !user) {
-        console.log("[UserProvider] No session found")
         setUser(null)
         setProfile(null)
       } else {
-        console.log("[UserProvider] Session found:", user)
         setUser(user)
 
         // Fetch profile data
         const userProfile = await getProfileFromId(user.id)
         if (userProfile) {
-          console.log("[UserProvider] Profile loaded:", userProfile)
           setProfile(userProfile)
         } else {
-          console.log("[UserProvider] No profile found")
           setProfile(null)
         }
       }
-    } catch (err) {
-      console.error("[UserProvider] Error fetching session:", err)
+    } catch {
       setUser(null)
       setProfile(null)
     } finally {

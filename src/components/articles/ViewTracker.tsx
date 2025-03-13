@@ -32,7 +32,6 @@ export default function ViewTracker({
         const alreadyViewed = localStorage.getItem(viewKey)
 
         if (alreadyViewed) {
-            console.log(`[ViewTracker] Post ${postId} already viewed in this session`)
             viewRegistered.current = true
         }
 
@@ -45,7 +44,6 @@ export default function ViewTracker({
 
     // Set up intersection observer to track reading progress
     useEffect(() => {
-        console.log("[ViewTracker] Component mounted. Tracking started.")
 
         // Find the article content
         const findContent = () => {
@@ -78,7 +76,6 @@ export default function ViewTracker({
                 return
             }
 
-            console.log("[ViewTracker] Blog content found. Setting up observer...")
 
             // Create markers at different points in the article to track reading progress
             const articleHeight = contentRef.current.offsetHeight
@@ -106,7 +103,6 @@ export default function ViewTracker({
                             setIsVisible(true)
                             const percentage = Number.parseInt(entry.target.getAttribute("data-marker") || "0")
                             maxReadPercentage.current = Math.max(maxReadPercentage.current, percentage)
-                            console.log(`[ViewTracker] Read percentage: ${maxReadPercentage.current}%`)
                         }
                     })
                 },
@@ -152,18 +148,12 @@ export default function ViewTracker({
         debounce(async () => {
             // Don't send if already registered or if view time is too short
             if (viewRegistered.current || totalTime.current < threshold || !userId) {
-                console.log("[ViewTracker] Skipping view registration:", {
-                    alreadyRegistered: viewRegistered.current,
-                    viewTime: totalTime.current,
-                    threshold,
-                    hasUserId: !!userId,
-                })
                 return
             }
 
             const viewData = {
                 postId,
-                userId,
+                userId: userId ?? null,
                 sessionId: sessionId.current,
                 viewTime: Math.round(totalTime.current),
                 readPercentage: Math.round(maxReadPercentage.current),
@@ -171,7 +161,6 @@ export default function ViewTracker({
                 timestamp: new Date().toISOString(),
             }
 
-            console.log("[ViewTracker] Sending view data:", viewData)
 
             try {
                 const response = await fetch(apiEndpoint, {
@@ -186,8 +175,6 @@ export default function ViewTracker({
                     throw new Error(`Server responded with ${response.status}`)
                 }
 
-                const data = await response.json()
-                console.log("[ViewTracker] View registered successfully:", data)
                 viewRegistered.current = true
             } catch (error) {
                 console.error("[ViewTracker] Failed to register view:", error)
@@ -200,7 +187,7 @@ export default function ViewTracker({
     useEffect(() => {
         // Check if we should register a view (after minimum time threshold)
         const viewCheckInterval = setInterval(() => {
-            if (isVisible && totalTime.current >= threshold && !viewRegistered.current && userId) {
+            if (isVisible && totalTime.current >= threshold && !viewRegistered.current) {
                 sendViewData()
             }
         }, 2000)

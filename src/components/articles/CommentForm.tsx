@@ -36,7 +36,6 @@ export function CommentForm({
 
     const submitComment = async () => {
         try {
-            console.log("Submitting comment with user id: ", userId) // Log submission attempt
             const newComment = await createComment({
                 postId,
                 profileId: userId ?? null,  // Ensuring userId is not undefined/null
@@ -44,7 +43,6 @@ export function CommentForm({
                 parentId,
             })
 
-            console.log("Received comment response:", newComment) // Log the response for debugging
 
             if (newComment && newComment.comment) {
                 setContent("")
@@ -66,7 +64,6 @@ export function CommentForm({
             }
         } finally {
             setIsSubmitting(false)
-            console.log("Comment submission finished") // Log completion of submission attempt
         }
     }
 
@@ -112,7 +109,7 @@ export function CommentForm({
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={placeholder}
-                className="min-h-[80px] w-full"
+                className="min-h-[80px] w-full resize-none" // Disable resize
                 disabled={isSubmitting}
                 aria-label="Comment content"
             />

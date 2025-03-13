@@ -19,7 +19,6 @@ export async function POST(req: NextRequest) {
         const res = await fetch(`https://ip-api.com/json/${ip}`);
         const data = await res.json();
         const country = data.countryCode;
-        console.log(data)
 
         // Create Supabase instance
         const supabase = createClient(cookies());

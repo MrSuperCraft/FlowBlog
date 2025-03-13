@@ -41,8 +41,6 @@ export async function createComment({
         return { success: false, error: "Disallowed attempt of posting a comment." }
     }
 
-    // Log user information and query parameters for debugging
-    console.log("Submitting comment with user id:", profileId)
 
     const { data, error } = await supabaseClient
         .from("comments")
@@ -55,11 +53,7 @@ export async function createComment({
         return { success: false, error: error.message }
     }
 
-    const { data: countData, error: countError } = await supabaseClient.rpc("adjust_comment_count", { post_id: postId, increment: true })
-    console.log(countData)
-    console.log(countError)
-
-    console.log("Comment created successfully:", data)
+    await supabaseClient.rpc("adjust_comment_count", { post_id: postId, increment: true })
     return { success: true, comment: data as Comment }
 }
 
@@ -109,7 +103,6 @@ export async function updateComment(commentId: string, text: string): Promise<Co
  */
 export async function deleteComment(commentId: string): Promise<boolean> {
     try {
-        console.log("[deleteComment] Checking if comment exists...")
 
         // Check if the comment exists before deleting
         const { data: existingComment, error: fetchError } = await supabaseClient
@@ -120,16 +113,13 @@ export async function deleteComment(commentId: string): Promise<boolean> {
 
 
         if (fetchError) {
-            console.error("[deleteComment] Error fetching comment:", fetchError.message)
             throw new Error(`Error fetching comment: ${fetchError.message}`)
         }
 
         if (!existingComment) {
-            console.warn("[deleteComment] Comment not found, cannot delete")
             return false
         }
 
-        console.log("[deleteComment] Comment found, proceeding with deletion...")
         const post_id = existingComment.post_id
 
 
@@ -140,20 +130,17 @@ export async function deleteComment(commentId: string): Promise<boolean> {
             .eq("id", commentId)
 
 
-        console.log(deleteError)
 
         if (deleteError) {
-            console.error("[deleteComment] Error deleting comment:", deleteError.message)
             throw new Error(`Error deleting comment: ${deleteError.message}`)
         }
 
         await supabaseClient.rpc("adjust_comment_count", { post_id: post_id, increment: false })
 
 
-        console.log("[deleteComment] Comment deleted successfully!")
         return true
     } catch (error) {
-        console.error("[deleteComment] Error:", error)
+        console.error("Error in deletion of the comment:", error)
         return false
     }
 }
