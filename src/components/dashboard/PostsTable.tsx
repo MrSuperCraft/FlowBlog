@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
 import {
     ArrowUpDown,
     ChevronsUpDown,
@@ -29,6 +30,8 @@ import {
     Eye,
     AlertCircle,
     PencilLine,
+    Calendar,
+    Check,
 } from "lucide-react"
 import {
     flexRender,
@@ -41,7 +44,7 @@ import {
     type SortingState,
     type ColumnFiltersState,
 } from "@tanstack/react-table"
-import type { Post } from "@/shared/types"
+import type { BlogPost, Post, PostStatus } from "@/shared/types"
 import Link from "next/link"
 import {
     Dialog,
@@ -65,9 +68,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-
-// Missing imports
-import { Check } from "lucide-react"
 import { useUser } from "@/shared/context/UserContext"
 
 // Format date helper
@@ -77,6 +77,17 @@ const formatDate = (date: Date | string | null) => {
     return new Intl.DateTimeFormat("en-US", {
         dateStyle: "medium",
         timeStyle: "short",
+    }).format(dateObj)
+}
+
+// Format date for mobile view (more compact)
+const formatDateCompact = (date: Date | string | null) => {
+    if (!date) return "—"
+    const dateObj = typeof date === "string" ? new Date(date) : date
+    return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
     }).format(dateObj)
 }
 
@@ -104,6 +115,7 @@ const getStatusBadge = (status: string) => {
     }
 }
 
+
 interface PostsTableProps {
     initialData: Post[] | []
     isLoading?: boolean
@@ -119,16 +131,22 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
     const [postToDelete, setPostToDelete] = useState<string | null>(null)
     const [quickEditPost, setQuickEditPost] = useState<Post | null>(null)
     const [quickEditTitle, setQuickEditTitle] = useState("")
-    const [quickEditStatus, setQuickEditStatus] = useState<string>("")
+    const [quickEditStatus, setQuickEditStatus] = useState<PostStatus>("published")
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const { profile } = useUser();
+    const { profile } = useUser()
+
 
     // Function to update local data
-    const updateLocalData = useCallback((updatedPost: Post) => {
+    const updateLocalData = useCallback((updatedPost: BlogPost | null) => {
+        if (!updatedPost) {
+            console.error("updateLocalData was called with null or undefined");
+            return;
+        }
+
         setData((currentData) =>
-            currentData.map((post) => (post.id === updatedPost.id ? { ...post, ...updatedPost } : post)),
-        )
-    }, [])
+            currentData.map((post) => (post.id === updatedPost.id ? { ...post, ...updatedPost } : post))
+        );
+    }, []);
 
     // Update data when initialData changes
     useEffect(() => {
@@ -163,30 +181,31 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
 
     // Handle quick edit save
     const handleQuickEditSave = async () => {
-        if (!quickEditPost) return
+        if (!quickEditPost || !quickEditPost.id) {
+            console.error("quickEditPost is null or missing ID");
+            return;
+        }
 
         try {
-            setIsSubmitting(true)
-
-            // Ensure quickEditPost is valid before accessing id
-            if (!quickEditPost.id) {
-                throw new Error("quickEditPost has no ID")
-            }
+            setIsSubmitting(true);
 
             const updatedPost = await updatePost(quickEditPost.id, {
                 title: quickEditTitle,
-                status: quickEditStatus as "published" | "draft" | "archived",
-            })
+                status: quickEditStatus as PostStatus,
+            });
 
+            if (!updatedPost) return;
             updateLocalData(updatedPost)
-            setQuickEditPost(null)
-            if (onRefresh) onRefresh()
+
+            setQuickEditPost(null);
+            if (onRefresh) onRefresh();
         } catch (error) {
-            console.error("Error updating post:", error)
+            console.error("Error updating post:", error);
         } finally {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
-    }
+    };
+
 
 
     // Define columns
@@ -308,7 +327,10 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-[180px]">
                                 <DropdownMenuItem asChild>
-                                    <Link href={`/dashboard/edit/${post.id}`} className="flex items-center px-3 py-2 cursor-pointer hover:bg-muted rounded-md transition-colors">
+                                    <Link
+                                        href={`/dashboard/edit/${post.id}`}
+                                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-muted rounded-md transition-colors"
+                                    >
                                         <PencilLine className="mr-2 h-4 w-4 transition-transform group-hover:scale-105" />
                                         <span>Edit</span>
                                     </Link>
@@ -316,7 +338,7 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
 
                                 <DropdownMenuItem
                                     onClick={() => {
-                                        setQuickEditPost(post);
+                                        setQuickEditPost(post)
                                     }}
                                     className="flex items-center px-3 py-2 cursor-pointer hover:bg-muted rounded-md transition-colors"
                                 >
@@ -325,7 +347,11 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem asChild>
-                                    <Link href={`/${profile?.full_name}/${post.slug}`} target="_blank" className="flex items-center px-3 py-2 cursor-pointer hover:bg-muted rounded-md transition-colors">
+                                    <Link
+                                        href={`/${profile?.full_name}/${post.slug}`}
+                                        target="_blank"
+                                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-muted rounded-md transition-colors"
+                                    >
                                         <Eye className="mr-2 h-4 w-4 transition-transform group-hover:scale-105" />
                                         <span>View</span>
                                     </Link>
@@ -335,8 +361,8 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
 
                                 <DropdownMenuItem
                                     onClick={() => {
-                                        setPostToDelete(post.id);
-                                        setDeleteDialogOpen(true);
+                                        setPostToDelete(post.id)
+                                        setDeleteDialogOpen(true)
                                     }}
                                     className="flex items-center px-3 py-2 cursor-pointer text-destructive hover:bg-destructive/10 rounded-md"
                                 >
@@ -372,6 +398,234 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
     // Get unique statuses for filter
     const statuses = data ? Array.from(new Set(data.map((post) => post.status))) : []
 
+    // Render post actions menu (used in both table and card views)
+    const renderPostActions = (post: Post) => (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only">Open menu</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[180px]">
+                <DropdownMenuItem asChild>
+                    <Link
+                        href={`/dashboard/edit/${post.id}`}
+                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-muted rounded-md transition-colors"
+                    >
+                        <PencilLine className="mr-2 h-4 w-4 transition-transform group-hover:scale-105" />
+                        <span>Edit</span>
+                    </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                    onClick={() => {
+                        setQuickEditPost(post)
+                    }}
+                    className="flex items-center px-3 py-2 cursor-pointer hover:bg-muted rounded-md transition-colors"
+                >
+                    <Pencil className="mr-2 h-4 w-4 transition-transform group-hover:scale-105" />
+                    <span>Quick Edit</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                    <Link
+                        href={`/${profile?.full_name}/${post.slug}`}
+                        target="_blank"
+                        className="flex items-center px-3 py-2 cursor-pointer hover:bg-muted rounded-md transition-colors"
+                    >
+                        <Eye className="mr-2 h-4 w-4 transition-transform group-hover:scale-105" />
+                        <span>View</span>
+                    </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                    onClick={() => {
+                        setPostToDelete(post.id)
+                        setDeleteDialogOpen(true)
+                    }}
+                    className="flex items-center px-3 py-2 cursor-pointer text-destructive hover:bg-destructive/10 rounded-md"
+                >
+                    <Trash2 className="mr-2 h-4 w-4 transition-transform text-destructive group-hover:scale-105" />
+                    <span>Delete</span>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+
+    // Render loading skeletons for card view
+    const renderCardSkeletons = () => (
+        <div className="grid grid-cols-1 gap-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+                <Card key={`card-skeleton-${index}`} className="overflow-hidden">
+                    <CardContent className="p-0">
+                        <div className="p-4 space-y-3">
+                            <Skeleton className="h-6 w-3/4" />
+                            <div className="flex items-center space-x-2">
+                                <Skeleton className="h-5 w-20" />
+                                <Skeleton className="h-5 w-24" />
+                            </div>
+                            <Skeleton className="h-4 w-full" />
+                            <div className="flex justify-between items-center pt-2">
+                                <Skeleton className="h-4 w-24" />
+                                <Skeleton className="h-8 w-8 rounded-full" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    )
+
+    // Render empty state for both views
+    const renderEmptyState = () => (
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+            <div className="rounded-full bg-muted p-3 mb-4">
+                <AlertCircle className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="text-lg font-medium mb-2">No posts found</p>
+            <p className="text-sm text-muted-foreground max-w-md mb-6">
+                {globalFilter || Object.keys(columnFilters).length > 0
+                    ? "Try adjusting your search or filters"
+                    : "Create a new post to get started"}
+            </p>
+            {(globalFilter || Object.keys(columnFilters).length > 0) && (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                        setGlobalFilter("")
+                        setColumnFilters([])
+                    }}
+                >
+                    Clear filters
+                </Button>
+            )}
+        </div>
+    )
+
+    // Render card view
+    const renderCardView = () => {
+        if (isLoading) {
+            return renderCardSkeletons()
+        }
+
+        if (data === null || data.length === 0) {
+            return renderEmptyState()
+        }
+
+        return (
+            <div className="grid grid-cols-1 gap-4">
+                {table.getRowModel().rows.map((row) => {
+                    const post = row.original
+                    return (
+                        <Card key={post.id} className="overflow-hidden hover:border-primary/20 transition-colors">
+                            <CardContent className="p-0">
+                                <div className="p-4 space-y-2">
+                                    <div className="flex justify-between items-start">
+                                        <h3 className="font-medium text-base">{post.title}</h3>
+                                        {renderPostActions(post)}
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                                        {getStatusBadge(post.status)}
+
+                                        <div className="flex items-center text-muted-foreground text-xs">
+                                            <Calendar className="h-3 w-3 mr-1" />
+                                            <span>{formatDateCompact(post.publishedAt || post.createdAt)}</span>
+                                        </div>
+                                    </div>
+
+                                    {(post.excerpt || post.content) && (
+                                        <p className="text-sm text-muted-foreground line-clamp-2">
+                                            {truncateText(post.excerpt || post.content || "", 120)}
+                                        </p>
+                                    )}
+
+                                    <div className="flex justify-between items-center pt-2 text-xs text-muted-foreground">
+                                        <div className="flex items-center gap-4">
+                                            <Link
+                                                href={`/dashboard/edit/${post.id}`}
+                                                className="flex items-center hover:text-foreground transition-colors"
+                                            >
+                                                <Pencil className="h-3 w-3 mr-1" />
+                                                <span>Edit</span>
+                                            </Link>
+
+                                            <Link
+                                                href={`/${profile?.full_name}/${post.slug}`}
+                                                target="_blank"
+                                                className="flex items-center hover:text-foreground transition-colors"
+                                            >
+                                                <Eye className="h-3 w-3 mr-1" />
+                                                <span>View</span>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )
+                })}
+            </div>
+        )
+    }
+
+    // Render table view
+    const renderTableView = () => (
+        <div className="rounded-md border overflow-hidden">
+            <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader className="bg-accent">
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => (
+                                    <TableHead key={header.id} className="whitespace-nowrap">
+                                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                    </TableHead>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {isLoading ? (
+                            // Loading state
+                            Array.from({ length: 5 }).map((_, index) => (
+                                <TableRow key={`loading-${index}`}>
+                                    {table.getVisibleLeafColumns().map((column, colIndex) => (
+                                        <TableCell key={`loading-cell-${colIndex}`}>
+                                            <Skeleton className="h-6 w-full" />
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : data === null || data.length === 0 ? (
+                            // Empty state
+                            <TableRow>
+                                <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
+                                    {renderEmptyState()}
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            // Data rows
+                            table
+                                .getRowModel()
+                                .rows.map((row) => (
+                                    <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="group">
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+    )
+
     return (
         <div className="space-y-4">
             {/* Header with title and add button */}
@@ -380,12 +634,15 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
                     <h2 className="text-2xl font-semibold tracking-tight">Posts</h2>
                     <p className="text-sm text-muted-foreground">Manage and organize your blog posts</p>
                 </div>
-                <Link href="/dashboard/new" className="sm:self-end">
-                    <Button>
-                        <MessageSquarePlus className="mr-2 h-4 w-4" />
-                        Create Post
-                    </Button>
-                </Link>
+                <div className="flex items-center gap-2">
+                    <Link href="/dashboard/new">
+                        <Button>
+                            <MessageSquarePlus className="mr-2 h-4 w-4" />
+                            <span className="hidden sm:inline">Create Post</span>
+                            <span className="sm:hidden">New</span>
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             {/* Filters and search */}
@@ -405,7 +662,7 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-9">
                                 <Filter className="mr-2 h-4 w-4" />
-                                Status
+                                <span>Status</span>
                                 <ChevronLeft className="ml-2 h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
@@ -435,7 +692,7 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-9 ml-auto">
                                 <ChevronsUpDown className="mr-2 h-4 w-4" />
-                                Columns
+                                <span>Columns</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -457,85 +714,23 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader className="bg-accent">
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className="whitespace-nowrap">
-                                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            // Loading state
-                            Array.from({ length: 5 }).map((_, index) => (
-                                <TableRow key={`loading-${index}`}>
-                                    {columns.map((column, colIndex) => (
-                                        <TableCell key={`loading-cell-${colIndex}`}>
-                                            <Skeleton className="h-6 w-full" />
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
-                        ) : data === null || data.length === 0 ? (
-                            // Empty state
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    <div className="flex flex-col items-center justify-center space-y-2">
-                                        <div className="rounded-full bg-muted p-3">
-                                            <AlertCircle className="h-6 w-6 text-muted-foreground" />
-                                        </div>
-                                        <p className="text-lg font-medium">No posts found</p>
-                                        <p className="text-sm text-muted-foreground max-w-md">
-                                            {globalFilter || Object.keys(columnFilters).length > 0
-                                                ? "Try adjusting your search or filters"
-                                                : "Create a new post to get started"}
-                                        </p>
-                                        {(globalFilter || Object.keys(columnFilters).length > 0) && (
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => {
-                                                    setGlobalFilter("")
-                                                    setColumnFilters([])
-                                                }}
-                                            >
-                                                Clear filters
-                                            </Button>
-                                        )}
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            // Data rows
-                            table
-                                .getRowModel()
-                                .rows.map((row) => (
-                                    <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="group">
-                                        {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))
-                        )}
-                    </TableBody>
-                </Table>
+            <div>
+                <div className="xl:block hidden">
+                    {renderTableView()}
+                </div>
+                <div className="block xl:hidden">
+                    {renderCardView()}
+                </div>
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between">
-                <div className="flex-1 text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-sm text-muted-foreground order-2 sm:order-1">
                     {table.getFilteredRowModel().rows.length} post{table.getFilteredRowModel().rows.length !== 1 ? "s" : ""} total
                 </div>
-                <div className="flex items-center space-x-6 lg:space-x-8">
-                    <div className="flex items-center space-x-2">
-                        <p className="text-sm font-medium">Rows per page</p>
+                <div className="flex flex-wrap items-center justify-center gap-4 order-1 sm:order-2">
+                    <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium whitespace-nowrap hidden xs:block">Rows per page</p>
                         <Select
                             value={`${table.getState().pagination.pageSize}`}
                             onValueChange={(value) => {
@@ -554,46 +749,48 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                        Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Button
-                            variant="outline"
-                            className="hidden h-8 w-8 p-0 lg:flex"
-                            onClick={() => table.setPageIndex(0)}
-                            disabled={!table.getCanPreviousPage()}
-                        >
-                            <span className="sr-only">Go to first page</span>
-                            <ChevronsLeft className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="h-8 w-8 p-0"
-                            onClick={() => table.previousPage()}
-                            disabled={!table.getCanPreviousPage()}
-                        >
-                            <span className="sr-only">Go to previous page</span>
-                            <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="h-8 w-8 p-0"
-                            onClick={() => table.nextPage()}
-                            disabled={!table.getCanNextPage()}
-                        >
-                            <span className="sr-only">Go to next page</span>
-                            <ChevronRight className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="hidden h-8 w-8 p-0 lg:flex"
-                            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                            disabled={!table.getCanNextPage()}
-                        >
-                            <span className="sr-only">Go to last page</span>
-                            <ChevronsRight className="h-4 w-4" />
-                        </Button>
+                    <div className="flex items-center gap-4">
+                        <div className="text-sm font-medium whitespace-nowrap">
+                            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Button
+                                variant="outline"
+                                className="hidden h-8 w-8 p-0 lg:flex"
+                                onClick={() => table.setPageIndex(0)}
+                                disabled={!table.getCanPreviousPage()}
+                            >
+                                <span className="sr-only">Go to first page</span>
+                                <ChevronsLeft className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="h-8 w-8 p-0"
+                                onClick={() => table.previousPage()}
+                                disabled={!table.getCanPreviousPage()}
+                            >
+                                <span className="sr-only">Go to previous page</span>
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="h-8 w-8 p-0"
+                                onClick={() => table.nextPage()}
+                                disabled={!table.getCanNextPage()}
+                            >
+                                <span className="sr-only">Go to next page</span>
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="hidden h-8 w-8 p-0 lg:flex"
+                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                                disabled={!table.getCanNextPage()}
+                            >
+                                <span className="sr-only">Go to last page</span>
+                                <ChevronsRight className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -635,18 +832,14 @@ export function PostsTable({ initialData, isLoading = false, onRefresh }: PostsT
                                 Title
                             </label>
                             <div className="col-span-3 w-full">
-                                <Input
-                                    id="title"
-                                    value={quickEditTitle}
-                                    onChange={(e) => setQuickEditTitle(e.target.value)}
-                                />
+                                <Input id="title" value={quickEditTitle} onChange={(e) => setQuickEditTitle(e.target.value)} />
                             </div>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <label htmlFor="status" className="text-right text-sm font-medium">
                                 Status
                             </label>
-                            <Select value={quickEditStatus} onValueChange={setQuickEditStatus}>
+                            <Select value={quickEditStatus} onValueChange={(value) => setQuickEditStatus(value as PostStatus)}>
                                 <SelectTrigger className="col-span-3">
                                     <SelectValue placeholder="Select status" />
                                 </SelectTrigger>

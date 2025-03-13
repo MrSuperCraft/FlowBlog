@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { Edit3, LayoutDashboard, LoaderIcon, Search, User, X } from "lucide-react"
+import { Feather, LayoutDashboard, LoaderIcon, Search, User, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { isAuthenticated as checkAuth } from "@/shared/lib/supabase/helpers"
@@ -119,7 +119,7 @@ export function Header({ children }: { children?: React.ReactNode }) {
         {/* Left Section */}
         <div className="flex items-center space-x-2 sm:space-x-4">
           <Link href="/" className="hidden items-center space-x-2 md:flex">
-            <Edit3 size={24} />
+            <Feather size={24} />
             <span className="font-bold">FlowBlog</span>
           </Link>
           <div className="flex md:hidden">

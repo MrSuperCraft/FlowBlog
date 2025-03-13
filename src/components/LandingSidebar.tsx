@@ -12,13 +12,11 @@ import { cn } from "@/shared/lib/utils";
 
 import {
   Home,
-  Bookmark,
-  TrendingUp,
   PenSquare,
   Menu,
-  Twitter,
-  Facebook,
-  Instagram,
+  BookOpenText,
+  Sparkles,
+  Shield,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -30,16 +28,17 @@ interface SidebarItem {
 // Core nav items for everyone
 const baseItems: SidebarItem[] = [
   { label: "Home", href: "/", icon: <Home /> },
-  { label: "Bookmarks", href: "/bookmarks", icon: <Bookmark /> },
-  { label: "Trending", href: "/trending", icon: <TrendingUp /> },
+  { label: "About", href: "/about", icon: <BookOpenText /> },
+  { label: "Guides", href: "/t/guide", icon: <Sparkles /> },
+  { label: "Legal", href: "/privacy", icon: <Shield /> }
 ];
 
 // Social links
-const socialLinks = [
-  { icon: Twitter, label: "Twitter", url: "https://twitter.com" },
-  { icon: Facebook, label: "Facebook", url: "https://facebook.com" },
-  { icon: Instagram, label: "Instagram", url: "https://instagram.com" },
-];
+// const socialLinks = [
+//   { icon: Twitter, label: "Twitter", url: "https://twitter.com" },
+//   { icon: Facebook, label: "Facebook", url: "https://facebook.com" },
+//   { icon: Instagram, label: "Instagram", url: "https://instagram.com" },
+// ];
 
 export default function LandingSidebar() {
   const [open, setOpen] = useState(false);
@@ -155,7 +154,7 @@ export default function LandingSidebar() {
         to bring you the best blogging experience.
       </p>
       <div className="flex justify-center gap-6 mt-6">
-        {socialLinks.map((link) => (
+        {/* {socialLinks.map((link) => (
           <Link
             key={link.label}
             href={link.url}
@@ -165,10 +164,13 @@ export default function LandingSidebar() {
           >
             <link.icon className="h-5 w-5" />
           </Link>
-        ))}
+        ))} */}
       </div>
-      <p className="text-sm text-neutral-400 dark:text-neutral-500 text-center mt-6">
+      <p className="text-sm text-neutral-400 dark:text-neutral-400/90 text-center mt-6">
         © {new Date().getFullYear()} FlowBlog. All rights reserved.
+      </p>
+      <p className="text-sm text-neutral-400 dark:text-neutral-400/90 text-center">
+        FlowBlog was created by <Link href="https://itamar-hanan.web.app" className="text-primary underline">Itamar Hanan</Link>.
       </p>
     </footer>
   );

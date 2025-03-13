@@ -10,7 +10,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { ChevronDown, Home, User, List, Settings, PieChart } from "lucide-react";
+import { ChevronDown, Home, User, List, Settings, PieChart, Feather } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -121,8 +121,8 @@ const AppSidebar: React.FC = () => {
     const sidebarContent = (
         <>
             <div className={cn("p-4 py-8", !isExpanded && "p-2")}>
-                <h1 className={cn("font-bold", isExpanded ? "text-2xl" : "text-center text-xl")}>
-                    {isExpanded ? "BlogFlow" : "B"}
+                <h1 className={cn("font-bold", isExpanded ? "text-2xl" : "flex items-center justify-center text-center text-xl")}>
+                    {isExpanded ? <div className="flex"><Feather className="mr-2" /> FlowBlog</div> : <Feather />}
                 </h1>
             </div>
             <ScrollArea className="flex-1 py-4">
