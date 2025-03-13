@@ -76,7 +76,9 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 
 export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
     const { username } = await params
-    const profile = (await getProfileFromUsername(username)) as Profile | null
+    const cleanUser = decodeURIComponent(username)
+
+    const profile = (await getProfileFromUsername(cleanUser)) as Profile | null
 
     if (!profile) {
         return notFound();
@@ -91,7 +93,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             .map((name) => name[0])
             .join("")
             .toUpperCase()
-        : username.substring(0, 2).toUpperCase()
+        : cleanUser.substring(0, 2).toUpperCase()
 
     return (
         <div>
@@ -106,7 +108,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                         <Avatar
                             className="w-24 h-24 border-4 border-background shadow-sm"
                             src={profile.avatar_url || ""}
-                            alt={profile.full_name || username}
+                            alt={profile.full_name || cleanUser}
                             fallback={initials}
                         />
 
@@ -204,7 +206,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                                         {/* Featured article - first article gets special treatment */}
                                         {posts.length > 0 && (
                                             <div className="mb-8">
-                                                <FeaturedArticleCard article={posts[0]} username={username} />
+                                                <FeaturedArticleCard article={posts[0]} username={cleanUser} />
                                             </div>
                                         )}
 
@@ -212,7 +214,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                                         {posts.length > 1 && (
                                             <div className="space-y-6">
                                                 {posts.slice(1).map((article) => (
-                                                    <HorizontalArticleCard key={article.id} article={article} username={username} />
+                                                    <HorizontalArticleCard key={article.id} article={article} username={cleanUser} />
                                                 ))}
                                             </div>
                                         )}
