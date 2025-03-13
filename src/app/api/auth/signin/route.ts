@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       const supabase = createClient(cookies());
       const redirectTo =
         process.env.NODE_ENV === "production"
-          ? "https://your-production-domain.com/api/auth/callback"
+          ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/callback`
           : "http://localhost:3000/api/auth/callback";
 
       const { data, error } = await supabase.auth.signInWithOAuth({
