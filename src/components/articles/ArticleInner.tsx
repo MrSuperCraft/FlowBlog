@@ -71,7 +71,7 @@ const ArticleInner = ({
                                 <a href={`/${username}`} className="font-medium text-lg hover:underline">
                                     {profile?.full_name || username}
                                 </a>
-                                <div className="text-sm text-muted-foreground">@{username}</div>
+                                <div className="text-sm text-muted-foreground">@{decodeURIComponent(username)}</div>
                             </div>
                         </div>
 
