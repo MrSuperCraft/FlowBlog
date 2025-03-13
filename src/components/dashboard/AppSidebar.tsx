@@ -10,7 +10,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { ChevronDown, Home, User, List, Settings, PieChart, Box } from "lucide-react";
+import { ChevronDown, Home, User, List, Settings, PieChart, Feather } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -23,10 +23,6 @@ type NavItem = {
     subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
-const othersItems: NavItem[] = [
-    { icon: <PieChart className="h-5 w-5" />, name: "Analytics", path: "/dashboard/analytics" },
-    { icon: <Box className="h-5 w-5" />, name: "Media", path: "/media" },
-];
 
 const AppSidebar: React.FC = () => {
     const { isExpanded, isMobileOpen, openSubmenu, toggleMobileSidebar, toggleSubmenu } =
@@ -47,6 +43,7 @@ const AppSidebar: React.FC = () => {
                 { name: "New Post", path: "/dashboard/new" },
             ],
         },
+        { icon: <PieChart className="h-5 w-5" />, name: "Analytics", path: "/dashboard/analytics" },
         { icon: <Settings className="h-5 w-5" />, name: "Settings", path: "/dashboard/settings" },
     ];
 
@@ -124,15 +121,14 @@ const AppSidebar: React.FC = () => {
     const sidebarContent = (
         <>
             <div className={cn("p-4 py-8", !isExpanded && "p-2")}>
-                <h1 className={cn("font-bold", isExpanded ? "text-2xl" : "text-center text-xl")}>
-                    {isExpanded ? "BlogFlow" : "B"}
+                <h1 className={cn("font-bold", isExpanded ? "text-2xl" : "flex items-center justify-center text-center text-xl")}>
+                    {isExpanded ? <div className="flex"><Feather className="mr-2" /> FlowBlog</div> : <Feather />}
                 </h1>
             </div>
             <ScrollArea className="flex-1 py-4">
                 <nav className={cn("px-2", !isExpanded && "px-0")}>
                     {renderMenuItems(navItems)}
                     <div className="my-4 h-px bg-border" />
-                    {renderMenuItems(othersItems)}
                 </nav>
             </ScrollArea>
         </>

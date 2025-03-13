@@ -74,7 +74,7 @@ const AppHeader: React.FC = () => {
                             <AvatarWrapper>
                                 <AvatarImage height={40} width={40} src={profile ? profile.avatar_url : user?.user_metadata.avatar_url} />
                                 <AvatarFallback>
-                                    {(profile?.full_name as string)
+                                    {(profile?.full_name as string ?? "User Avatar")
                                         .split(' ')
                                         .map((n: string) => n[0])
                                         .join('')

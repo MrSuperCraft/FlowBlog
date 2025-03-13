@@ -1,7 +1,5 @@
 "use client"
 
-
-// @ts-expect-error buggy import
 import { BlockNoteView } from "@blocknote/mantine"
 import "@blocknote/mantine/style.css"
 import { useCreateBlockNote } from "@blocknote/react"

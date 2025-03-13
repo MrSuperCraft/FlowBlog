@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server"
 
 // Configure allowed origins
 const allowedOrigins =
-    process.env.NODE_ENV === "production" ? ["https://your-production-domain.com"] : ["http://localhost:3000"]
+    process.env.NODE_ENV === "production" ? [`${process.env.NEXT_PUBLIC_BASE_URL}`] : ["http://localhost:3000"]
 
 export function middleware(request: NextRequest) {
     // Get the origin from the request headers

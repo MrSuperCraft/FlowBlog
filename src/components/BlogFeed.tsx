@@ -4,10 +4,12 @@ import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Heart, Loader, MessageCircle, Share2, Eye, Calendar } from "lucide-react"
+import { Heart, Loader, MessageCircle, Eye, Calendar } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
+import Image from "next/image"
+import { cn } from "@/lib/utils"
 
 interface BlogPost {
   id: string
@@ -26,19 +28,16 @@ interface BlogPost {
 }
 
 const fetchPosts = async (page: number, tag?: string): Promise<BlogPost[]> => {
-  const url = tag
-    ? `/api/posts?page=${page}&post_limit=10&tag=${tag}`
-    : `/api/posts?page=${page}&post_limit=10`;
+  const url = tag ? `/api/posts?page=${page}&post_limit=10&tag=${tag}` : `/api/posts?page=${page}&post_limit=10`
 
-  const res = await fetch(url);
+  const res = await fetch(url)
 
   if (!res.ok) {
-    throw new Error("Failed to fetch posts");
+    throw new Error("Failed to fetch posts")
   }
 
-  return res.json();
-};
-
+  return res.json()
+}
 
 export default function BlogFeed({ tag }: { tag?: string }) {
   const [posts, setPosts] = useState<BlogPost[]>([])
@@ -55,7 +54,12 @@ export default function BlogFeed({ tag }: { tag?: string }) {
       if (newPosts.length === 0) {
         setHasMore(false)
       } else {
-        setPosts((prevPosts) => [...prevPosts, ...newPosts])
+        // Add deduplication logic to prevent duplicate posts
+        setPosts((prevPosts) => {
+          const existingIds = new Set(prevPosts.map((post) => post.id))
+          const uniqueNewPosts = newPosts.filter((post) => !existingIds.has(post.id))
+          return [...prevPosts, ...uniqueNewPosts]
+        })
         setPage((prevPage) => prevPage + 1)
       }
     } catch (error) {
@@ -67,8 +71,10 @@ export default function BlogFeed({ tag }: { tag?: string }) {
   }, [page, loading, hasMore, tag])
 
   useEffect(() => {
+    // Only load posts on initial mount
     loadMorePosts()
-  }, [loadMorePosts])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty dependency array to run only once
 
   useEffect(() => {
     const handleScroll = () => {
@@ -96,16 +102,46 @@ export default function BlogFeed({ tag }: { tag?: string }) {
     return <PostSkeletons count={3} />
   }
 
+  if (!initialLoad && posts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+        <div className="rounded-full bg-gray-100 dark:bg-neutral-800 p-6 mb-6">
+          <Eye className="h-10 w-10 text-gray-400 dark:text-neutral-500" />
+        </div>
+        <h3 className="text-xl font-semibold mb-2 dark:text-neutral-200">No posts found</h3>
+        <p className="text-gray-500 dark:text-neutral-400 max-w-md mb-6">
+          {tag ? `We couldn't find any posts with the tag "${tag}".` : "No posts are available at the moment."}
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => window.history.back()}
+          className="dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-700 dark:hover:bg-neutral-700"
+        >
+          Go Back
+        </Button>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8 px-2 md:px-8 lg:px-24 pb-12">
-      {posts.map((post) => (
+      {posts.map((post, index) => (
         <Link
           key={post.id}
           href={`/${post.author_full_name}/${post.slug}`}
           className="block transition-transform duration-200 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-900 rounded-lg"
         >
           <Card className="overflow-hidden border-gray-200 dark:border-neutral-800 hover:border-gray-300 dark:hover:border-gray-600 transition-transform duration-200 dark:bg-neutral-900">
-            <CardHeader className="pb-2 pt-6 px-6">
+            {index === 0 && post.cover_image && (
+              <Image
+                src={post.cover_image || "/placeholder.svg"}
+                alt={post.title}
+                className="w-full h-64 object-cover"
+                width={500}
+                height={200}
+              />
+            )}
+            <CardHeader className={cn("pb-2 pt-6 px-6", index === 0 && "pt-2")}>
               <div className="flex items-center space-x-2 mb-3">
                 <Avatar src={post.author_avatar_url} alt={post.author_full_name} fallback="User Avatar" />
 
@@ -172,14 +208,6 @@ export default function BlogFeed({ tag }: { tag?: string }) {
                 >
                   <MessageCircle className="mr-1 h-4 w-4" />
                   <span className="text-sm">{post.comments}</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-full dark:hover:bg-neutral-800 dark:text-neutral-300"
-                  tabIndex={-1}
-                >
-                  <Share2 className="h-4 w-4" />
                 </Button>
               </div>
             </CardFooter>

@@ -1,10 +1,16 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { UserX } from "lucide-react"
+import { Feather, UserX } from "lucide-react"
+
 
 export default function NotFound() {
     return (
         <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-center">
+            <div className="absolute top-4 left-4">
+                <Link href="/">
+                    <h2 className="flex gap-2 text-2xl font-bold items-center"><Feather /> FlowBlog</h2>
+                </Link>
+            </div>
             <div className="flex items-center justify-center w-20 h-20 rounded-full bg-muted mb-6">
                 <UserX className="h-10 w-10 text-muted-foreground" />
             </div>
@@ -14,12 +20,16 @@ export default function NotFound() {
                 account.
             </p>
             <div className="flex gap-4">
-                <Button asChild variant="outline">
-                    <Link href="/">Go Home</Link>
-                </Button>
-                <Button asChild>
-                    <Link href="/search">Search Users</Link>
-                </Button>
+                <Link href="/">
+                    <Button variant="outline">
+                        Go Home
+                    </Button>
+                </Link>
+                <Link href="/about">
+                    <Button>
+                        Learn about FlowBlog
+                    </Button>
+                </Link>
             </div>
         </div>
     )

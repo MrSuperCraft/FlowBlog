@@ -142,6 +142,21 @@ export function CreateNewPostPage() {
         setHasUnsavedChanges(true)
     }
 
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const file = e.dataTransfer.files?.[0];
+        if (file) {
+            setCoverImageUrl(URL.createObjectURL(file)); // For preview
+        }
+    };
+
+
     // Unified save handler for both published posts and drafts.
     const handleSave = async (status: "published" | "draft") => {
         if (title.trim() === "") {
@@ -269,14 +284,19 @@ export function CreateNewPostPage() {
                             </Button>
                         </div>
                     ) : (
-                        <div className="border border-dashed rounded-md p-8 text-center">
+                        <div
+                            className="border border-dashed rounded-md p-8 text-center relative cursor-pointer"
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                            onClick={() => document.getElementById("cover-image-upload")?.click()}
+                        >
                             <div className="flex flex-col items-center gap-2">
                                 <Upload className="h-8 w-8 text-muted-foreground" />
                                 <p className="text-sm font-medium">Drag and drop or click to upload</p>
                                 <p className="text-xs text-muted-foreground">Recommended size: 1200 × 675 pixels (16:9 ratio)</p>
                                 <p className="text-xs text-muted-foreground">Maximum size: 1MB</p>
-                                <label htmlFor="cover-image-upload">
-                                    <Button variant="secondary" size="sm" className="mt-2">
+                                <label htmlFor="cover-image-upload" className="cursor-pointer">
+                                    <Button variant="secondary" size="sm" className="mt-2 cursor-pointer">
                                         Select Image
                                     </Button>
                                 </label>

@@ -6,27 +6,27 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { supabaseClient } from "@/shared/lib/supabase/client";
 import Link from "next/link";
+import { getSuggestedAuthors } from "@/actions/post";
 
-// Replace with dynamic data from Supabase API or query
-const suggestedAuthors = [
-  { name: "Alice Johnson", avatar: "https://github.com/shadcn.png" },
-  { name: "Bob Smith", avatar: "https://github.com/shadcn.png" },
-  { name: "Carol Williams", avatar: "https://github.com/shadcn.png" },
-];
-
-// Define the expected structure of the topic data
 interface Topic {
   topic_name: string;
   posts_count: number;
   score: number;
 }
 
+interface SuggestedAuthor {
+  id: string;
+  full_name: string;
+  avatar_url: string;
+}
+
 export default function RightContent() {
   const [topics, setTopics] = useState<Topic[]>([]);
+  const [suggestedAuthors, setSuggestedAuthors] = useState<SuggestedAuthor[]>([])
 
-  // Logic to fetch trending topics from Supabase function
+  // Logic to fetch trending topics and suggested authors from Supabase function
   useEffect(() => {
-    async function fetchTrendingTopics() {
+    async function fetchData() {
       const { data, error } = await supabaseClient
         .rpc('get_trending_topics', { tag_limit: 5 });
 
@@ -40,9 +40,12 @@ export default function RightContent() {
         console.log('Fetched trending topics:', data);
         setTopics(data);
       }
+
+      const authors = await getSuggestedAuthors();
+      setSuggestedAuthors(authors);
     }
 
-    fetchTrendingTopics();
+    fetchData();
   }, []); // This effect runs only once, on mount
 
   return (
@@ -83,12 +86,14 @@ export default function RightContent() {
         <CardContent>
           <ul className="space-y-4">
             {suggestedAuthors.map((author) => (
-              <li key={author.name} className="flex items-center space-x-2">
-                <AvatarWrapper>
-                  <AvatarImage src={author.avatar} alt={author.name} />
-                  <AvatarFallback>{author.name[0]}</AvatarFallback>
-                </AvatarWrapper>
-                <span className="text-sm font-medium">{author.name}</span>
+              <li key={author.id}>
+                <Link href={`/${author.full_name}`} className="flex items-center space-x-2">
+                  <AvatarWrapper>
+                    <AvatarImage src={author.avatar_url} alt={author.full_name} />
+                    <AvatarFallback>{author.full_name[0]}</AvatarFallback>
+                  </AvatarWrapper>
+                  <span className="text-sm font-medium">{author.full_name}</span>
+                </Link>
               </li>
             ))}
           </ul>

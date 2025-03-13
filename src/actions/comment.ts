@@ -192,13 +192,15 @@ export async function getUserComments(id: string): Promise<Comment[]> {
     try {
         const { data, error } = await supabaseClient
             .from("comments")
-            .select("*") // Select all columns; modify this if you need specific fields
+            .select("*, posts(status)") // Join with posts table to check status
             .eq("profile_id", id)
             .order("created_at", { ascending: false }) // Order by latest comments first
+            .filter("posts.status", "neq", "draft") // Exclude drafted posts
+            .filter("posts.status", "neq", "archived") // Exclude archived posts
 
         if (error) throw error
 
-        return data || []
+        return data
     } catch (error) {
         console.error("Error fetching user comments:", error)
         return []
