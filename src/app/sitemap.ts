@@ -2,7 +2,7 @@ import { getSitemapUsernamesAndPosts } from "@/actions/sitemap";
 import { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = "https://yourdomain.com";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     const posts = await getSitemapUsernamesAndPosts();
 
     return [
