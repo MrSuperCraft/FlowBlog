@@ -42,8 +42,10 @@ export const metadata: Metadata = {
     site: "@ItamarHanan",
     images: [`${process.env.NEXT_PUBLIC_BASE_URL}/og-image.png`]
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION!
+  }
 };
-
 
 export default function RootLayout({
   children,

@@ -33,6 +33,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import { uploadCoverImage } from "@/actions/image"
 import { v4 as uuidv4 } from 'uuid';
+import { checkLanguage } from "@/lib/utils"
 
 
 export function CreateNewPostPage() {
@@ -215,6 +216,7 @@ export function CreateNewPostPage() {
                 status,
                 published_at: status === "published" ? new Date().toISOString() : null,
                 cover_image: coverImagePath, // Add the cover image URL
+                language: checkLanguage(sanitizeMarkdown(content)) as string
             })
 
             setHasUnsavedChanges(false)

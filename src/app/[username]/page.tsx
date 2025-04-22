@@ -351,7 +351,7 @@ async function FeaturedArticleCard({ article, username }: { article: BlogPost; u
                                 </span>
                             </div>
                         </div>
-                        <a href={`/${(await getProfileFromId(article.author_id))?.full_name as string}/${article.id}`}>
+                        <a href={`/${(await getProfileFromId(article.author_id))?.full_name as string}/${article.slug}`}>
                             <CardTitle className="text-2xl md:text-3xl hover:text-primary transition-colors">
                                 {article.title}
                             </CardTitle>
@@ -445,7 +445,7 @@ async function HorizontalArticleCard({ article, username }: { article: BlogPost;
                                 </span>
                             </div>
                         </div>
-                        <a href={`/${(await getProfileFromId(article.author_id))?.full_name as string}/${article.id}`}>
+                        <a href={`/${(await getProfileFromId(article.author_id))?.full_name as string}/${article.slug}`}>
                             <CardTitle className="text-xl hover:text-primary transition-colors line-clamp-1">
                                 {article.title}
                             </CardTitle>
