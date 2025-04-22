@@ -18,6 +18,8 @@ import {
   Sparkles,
   Shield,
 } from "lucide-react";
+import Image from "next/image";
+import { Separator } from "./ui/separator";
 
 interface SidebarItem {
   label: string;
@@ -133,6 +135,9 @@ export default function LandingSidebar() {
             </Button>
           )}
         </div>
+        <Separator className="w-full my-6" />
+        <Link href="https://www.producthunt.com/posts/flowblog?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-flowblog" target="_blank" className="mx-auto"><Image src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=941888&theme=light&t=1741904404365" alt="FlowBlog - A&#0032;modern&#0044;&#0032;minimalist&#0032;blogging&#0032;platform&#0032;for&#0032;creators | Product Hunt" style={{ width: "250px", height: "54px" }} width="250" height="54" /></Link>
+
       </nav>
     );
   };

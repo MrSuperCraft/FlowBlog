@@ -5,9 +5,9 @@ export default function robots(): MetadataRoute.Robots {
         rules: [
             {
                 userAgent: "*",
-                disallow: ["/api/", "/dashboard/", "/sign-in", "/sign-up"],
+                disallow: ["/dashboard/", "/sign-in", "/sign-up"],
             },
         ],
-        sitemap: "https://yourdomain.com/sitemap.xml",
+        sitemap: `${process.env.NEXT_PUBLIC_BASE_URL}/sitemap.xml`,
     };
 }

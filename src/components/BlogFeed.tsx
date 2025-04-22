@@ -141,7 +141,7 @@ export default function BlogFeed({ tag }: { tag?: string }) {
                 height={200}
               />
             )}
-            <CardHeader className={cn("pb-2 pt-6 px-6", index === 0 && "pt-2")}>
+            <CardHeader className={cn("pb-2 pt-6 px-6", index === 0 && post.cover_image != null && "pt-2")}>
               <div className="flex items-center space-x-2 mb-3">
                 <Avatar src={post.author_avatar_url} alt={post.author_full_name} fallback="User Avatar" />
 
